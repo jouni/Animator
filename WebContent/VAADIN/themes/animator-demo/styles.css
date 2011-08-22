@@ -1,0 +1,10 @@
+@import url(../reindeer/styles.css);
+
+.v-label-flash-static,
+.v-label-flash {
+	padding: 3px 12px;
+	}
+
+.v-label-flash {
+	background: #FFFED9;
+	}
