@@ -219,6 +219,10 @@ public class AnimatorProxy extends AbstractComponent {
 				AnimationListener.animMethod);
 	}
 
+	public void removeListener(AnimationListener listener) {
+		removeListener(AnimationEvent.EVENT_ID, AnimationEvent.class, listener);
+	}
+
 	public class AnimationEvent extends Component.Event {
 
 		private static final long serialVersionUID = 7075848445136103472L;
