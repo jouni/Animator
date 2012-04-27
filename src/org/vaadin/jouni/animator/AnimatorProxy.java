@@ -11,17 +11,19 @@ import org.vaadin.jouni.animator.client.ui.VAnimatorProxy.AnimType;
 import com.vaadin.event.EventRouter;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
+import com.vaadin.terminal.Vaadin6Component;
 import com.vaadin.tools.ReflectTools;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
+import com.vaadin.ui.Root;
 import com.vaadin.ui.Window;
 
 /**
  * Server side component for the VAnimator widget.
  */
-@com.vaadin.ui.ClientWidget(VAnimatorProxy.class)
-public class AnimatorProxy extends AbstractComponent {
+public class AnimatorProxy extends AbstractComponent implements
+		Vaadin6Component {
 
 	private static final long serialVersionUID = -1456900127464089642L;
 
@@ -110,10 +112,7 @@ public class AnimatorProxy extends AbstractComponent {
 	/* Incremental id for components; used in client-server communication */
 	private int animId = 0;
 
-	@Override
 	public void paintContent(PaintTarget target) throws PaintException {
-		super.paintContent(target);
-
 		if (queue != null) {
 			for (Animation a : queue) {
 				if (!animIdToRequest.containsValue(a)) {
@@ -121,7 +120,7 @@ public class AnimatorProxy extends AbstractComponent {
 				}
 				target.startTag("a");
 				target.addAttribute("aid", animId);
-				target.addAttribute("target", a.getTarget());
+				target.addAttribute("target", a.getTarget().getConnectorId());
 				target.addAttribute("type", a.getType().toString());
 				target.addAttribute("dur", a.getDuration());
 				target.addAttribute("delay", a.getDelay());
@@ -136,9 +135,7 @@ public class AnimatorProxy extends AbstractComponent {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public void changeVariables(Object source, Map<String, Object> variables) {
-		super.changeVariables(source, variables);
 		if (variables.containsKey("anim")) {
 			Map<String, Object> map = (Map<String, Object>) variables
 					.get("anim");
@@ -158,7 +155,7 @@ public class AnimatorProxy extends AbstractComponent {
 						|| type.equals(AnimType.ROLL_UP_CLOSE_REMOVE)
 						|| type.equals(AnimType.ROLL_LEFT_CLOSE_REMOVE)) {
 					if (ar.getTarget() instanceof Window) {
-						((Window) ar.getTarget().getParent())
+						((Root) ar.getTarget().getRoot())
 								.removeWindow((Window) ar.getTarget());
 					} else if (ar.getTarget().getParent() instanceof ComponentContainer) {
 						((ComponentContainer) ar.getTarget().getParent())
@@ -222,7 +219,7 @@ public class AnimatorProxy extends AbstractComponent {
 	public class AnimationEvent extends Component.Event {
 
 		private static final long serialVersionUID = 7075848445136103472L;
-		
+
 		/**
 		 * Identifier for event that can be used in {@link EventRouter}
 		 */
