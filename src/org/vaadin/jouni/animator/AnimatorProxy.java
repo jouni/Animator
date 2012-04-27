@@ -33,6 +33,7 @@ public class AnimatorProxy extends AbstractComponent implements
 		private Component target;
 		private AnimType type;
 		private String data;
+		private boolean cancel = false;
 
 		public Animation(Component target, AnimType type) {
 			this.type = type;
@@ -82,6 +83,15 @@ public class AnimatorProxy extends AbstractComponent implements
 			return data;
 		}
 
+		public Animation cancel() {
+			cancel = true;
+			return this;
+		}
+
+		public boolean isCancelled() {
+			return cancel;
+		}
+
 		@Override
 		public String toString() {
 			return "AnimRequest[" + type + " (duration=" + duration
@@ -92,6 +102,8 @@ public class AnimatorProxy extends AbstractComponent implements
 	}
 
 	private Vector<Animation> queue;
+
+	private boolean cancelAllRequested = false;
 
 	public AnimatorProxy() {
 	}
@@ -115,6 +127,9 @@ public class AnimatorProxy extends AbstractComponent implements
 	public void paintContent(PaintTarget target) throws PaintException {
 		if (queue != null) {
 			for (Animation a : queue) {
+				if (a.isCancelled()) {
+					continue;
+				}
 				if (!animIdToRequest.containsValue(a)) {
 					animIdToRequest.put(++animId, a);
 				}
@@ -129,6 +144,9 @@ public class AnimatorProxy extends AbstractComponent implements
 				}
 				target.endTag("a");
 			}
+		}
+		if (cancelAllRequested) {
+			target.addAttribute("cancelAll", true);
 		}
 
 		clearRequests();
@@ -151,6 +169,21 @@ public class AnimatorProxy extends AbstractComponent implements
 				fireAnimationEvent(ar, type);
 				// Cleanup
 				animIdToRequest.remove(aid);
+
+				// Was the animation cancelled?
+				boolean cancelled = false;
+				String[] values = sType.split(",");
+				if (values.length > 1) {
+					for (String s : values) {
+						if (s.startsWith("cancelled")) {
+							cancelled = true;
+						}
+					}
+				}
+
+				if (cancelled)
+					continue;
+
 				if (type.equals(AnimType.FADE_OUT_REMOVE)
 						|| type.equals(AnimType.ROLL_UP_CLOSE_REMOVE)
 						|| type.equals(AnimType.ROLL_LEFT_CLOSE_REMOVE)) {
@@ -162,7 +195,6 @@ public class AnimatorProxy extends AbstractComponent implements
 								.removeComponent(ar.getTarget());
 					}
 				} else if (type.equals(AnimType.SIZE)) {
-					String[] values = sType.split(",");
 					int width = -1;
 					int height = -1;
 					for (String keyValue : values) {
@@ -189,12 +221,14 @@ public class AnimatorProxy extends AbstractComponent implements
 	}
 
 	/**
-	 * Cancel all requested animations that have yet to be run.
+	 * Cancel all requested animations.
 	 * 
 	 * @return the instance of the Animator
 	 */
 	public AnimatorProxy cancelAll() {
 		clearRequests();
+		cancelAllRequested = true;
+		requestRepaint();
 		return this;
 	}
 
@@ -203,6 +237,21 @@ public class AnimatorProxy extends AbstractComponent implements
 			queue.clear();
 		}
 	}
+
+	/**
+	 * Request to cancel a particular animation. This method should usually be
+	 * called after the initial animation request has already been sent to the
+	 * client, and you wish to stop it after the fact.
+	 * 
+	 * @param animation
+	 * @return
+	 */
+	// public AnimatorProxy cancelAnimation(Animation animation) {
+	// animation.cancel();
+	// queue.add(animation);
+	// requestRepaint();
+	// return this;
+	// }
 
 	public interface AnimationListener {
 		public static final Method animMethod = ReflectTools.findMethod(

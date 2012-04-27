@@ -151,6 +151,8 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 		DOM.setStyleAttribute(getElement(), "overflow", "hidden");
 	}
 
+	private boolean cancellingAll = false;
+
 	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
 		paintableId = uidl.getId();
 		this.client = client;
@@ -160,7 +162,17 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 			UIDL ar = uidl.getChildUIDL(i);
 			runAnimation(ar);
 		}
+
+		if (uidl.hasAttribute("cancelAll")) {
+			cancellingAll = true;
+			for (Animation a : animations.values()) {
+				a.cancel();
+			}
+			cancellingAll = false;
+		}
 	}
+
+	private HashMap<Integer, Animation> animations = new HashMap<Integer, Animation>();
 
 	private void runAnimation(final UIDL a) {
 		Widget target = ((ComponentConnector) a.getPaintableAttribute("target",
@@ -187,12 +199,15 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 		if (type.indexOf("fade") == 0) {
 			FadeAnimation f = new FadeAnimation(target, type, aid);
 			f.run(duration, new Date().getTime() + delay);
+			animations.put(aid, f);
 		} else if (type.indexOf("roll") == 0) {
 			RollAnimation r = new RollAnimation(target, type, aid);
 			r.run(duration, new Date().getTime() + delay);
+			animations.put(aid, r);
 		} else if (type.indexOf("size") == 0) {
 			SizeAnimation s = new SizeAnimation(target, aid, data);
 			s.run(duration, new Date().getTime() + delay);
+			animations.put(aid, s);
 		}
 	}
 
@@ -320,6 +335,7 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 				Util.notifyParentOfSizeChange(target, true);
 			}
 			animEvents.put(aid + "", type);
+			animations.remove(aid);
 			if (immediate) {
 				queue.run();
 			} else {
@@ -329,7 +345,10 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 
 		@Override
 		protected void onCancel() {
-			animEvents.put(aid + "", type);
+			animEvents.put(aid + "", type + ",cancelled=true");
+			if (!cancellingAll) {
+				animations.remove(aid);
+			}
 			if (immediate) {
 				queue.run();
 			} else {
@@ -464,6 +483,7 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 				client.runDescendentsLayout((HasWidgets) target);
 			}
 			animEvents.put(aid + "", type);
+			animations.remove(aid);
 			if (immediate) {
 				queue.run();
 			} else {
@@ -477,7 +497,10 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 			if (target instanceof HasWidgets) {
 				client.runDescendentsLayout((HasWidgets) target);
 			}
-			animEvents.put(aid + "", type);
+			animEvents.put(aid + "", type + ",cancelled=true");
+			if (!cancellingAll) {
+				animations.remove(aid);
+			}
 			if (immediate) {
 				queue.run();
 			} else {
@@ -676,6 +699,7 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 			// TODO send window position back to server
 			animEvents.put(aid + "", AnimType.SIZE.toString() + ",width="
 					+ endWidth + ",height=" + endHeight);
+			animations.remove(aid);
 			if (immediate) {
 				queue.run();
 			} else {
@@ -690,7 +714,10 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 			}
 			Util.notifyParentOfSizeChange(target, true);
 			animEvents.put(aid + "", AnimType.SIZE.toString() + ",width="
-					+ endWidth + ",height=" + endHeight);
+					+ endWidth + ",height=" + endHeight + ",cancelled=true");
+			if (!cancellingAll) {
+				animations.remove(aid);
+			}
 			if (immediate) {
 				queue.run();
 			} else {
