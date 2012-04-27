@@ -12,11 +12,12 @@ import com.vaadin.ui.CustomComponent;
 /**
  * Server side component for the VAnimator widget.
  */
-@SuppressWarnings("serial")
 @com.vaadin.ui.ClientWidget(VAnimator.class)
 public class Animator extends CustomComponent {
 
-    private boolean fadeInRequested = false;
+	private static final long serialVersionUID = 9147461261436068140L;
+	
+	private boolean fadeInRequested = false;
     private boolean fadeOutRequested = false;
     private boolean rollDownRequested = false;
     private boolean rollUpRequested = false;
