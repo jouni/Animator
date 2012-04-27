@@ -29,6 +29,9 @@ public class Disclosure extends CssLayout {
 		super.addComponent(ap);
 		super.addComponent(this.caption);
 		this.caption.addListener(new Button.ClickListener() {
+
+			private static final long serialVersionUID = 6933589788152734072L;
+
 			public void buttonClick(ClickEvent event) {
 				if (open) {
 					close();
