@@ -22,3 +22,4 @@ deploy/*
 .svn
 
 *.launch
+WebContent/VAADIN/gwt-unitCache*
