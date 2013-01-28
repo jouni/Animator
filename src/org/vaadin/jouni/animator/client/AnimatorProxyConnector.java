@@ -1,15 +1,15 @@
-package org.vaadin.jouni.animator.client.ui;
+package org.vaadin.jouni.animator.client;
 
-import org.vaadin.jouni.animator.AnimatorProxy;
+import org.vaadin.jouni.animator.server.AnimatorProxy;
 
 import com.google.gwt.core.client.GWT;
-import com.vaadin.terminal.gwt.client.ApplicationConnection;
-import com.vaadin.terminal.gwt.client.UIDL;
-import com.vaadin.terminal.gwt.client.ui.Connect;
-import com.vaadin.terminal.gwt.client.ui.Vaadin6Connector;
+import com.vaadin.client.ApplicationConnection;
+import com.vaadin.client.UIDL;
+import com.vaadin.client.ui.LegacyConnector;
+import com.vaadin.shared.ui.Connect;
 
 @Connect(AnimatorProxy.class)
-public class AnimatorProxyConnector extends Vaadin6Connector {
+public class AnimatorProxyConnector extends LegacyConnector {
 
 	@Override
 	protected VAnimatorProxy createWidget() {

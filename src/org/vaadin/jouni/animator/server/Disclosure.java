@@ -1,6 +1,6 @@
-package org.vaadin.jouni.animator;
+package org.vaadin.jouni.animator.server;
 
-import org.vaadin.jouni.animator.client.ui.VAnimatorProxy.AnimType;
+import org.vaadin.jouni.animator.client.VAnimatorProxy.AnimType;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
