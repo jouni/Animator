@@ -197,11 +197,11 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
         String data = a.hasAttribute("data") ? a.getStringAttribute("data")
                 : null;
         if (type.indexOf("fade") == 0) {
-            FadeAnimation f = new FadeAnimation(target, type, aid);
+            FadeAnimation f = new FadeAnimation(target, type, aid, data);
             f.run(duration, new Date().getTime() + delay);
             animations.put(aid, f);
         } else if (type.indexOf("roll") == 0) {
-            RollAnimation r = new RollAnimation(target, type, aid);
+            RollAnimation r = new RollAnimation(target, type, aid, data);
             r.run(duration, new Date().getTime() + delay);
             animations.put(aid, r);
         } else if (type.indexOf("size") == 0) {
@@ -209,6 +209,14 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
             s.run(duration, new Date().getTime() + delay);
             animations.put(aid, s);
         }
+    }
+
+    @Override
+    protected void onDetach() {
+        for (Animation a : animations.values()) {
+            a.cancel();
+        }
+        super.onDetach();
     }
 
     protected class FadeAnimation extends Animation {
@@ -220,11 +228,13 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
         private String type;
         private boolean removeAfter = false;
         private boolean popBefore = false;
+        private String data;
 
-        public FadeAnimation(Widget w, String type, int aid) {
+        public FadeAnimation(Widget w, String type, int aid, String data) {
             target = w;
             this.type = type;
             this.aid = aid;
+            this.data = data;
             setDir(type.indexOf(AnimType.FADE_IN.toString()) == 0 ? 1 : -1);
             removeAfter = type.equals(AnimType.FADE_OUT_REMOVE.toString());
             popBefore = type.equals(AnimType.FADE_IN_POP.toString());
@@ -345,14 +355,16 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
 
         @Override
         protected void onCancel() {
-            animEvents.put(aid + "", type + ",cancelled=true");
-            if (!cancellingAll) {
-                animations.remove(aid);
-            }
-            if (immediate) {
-                queue.run();
-            } else {
-                queue.schedule(50);
+            if (data != null && !data.contains("ignoreCancel")) {
+                animEvents.put(aid + "", type + ",cancelled=true");
+                if (!cancellingAll) {
+                    animations.remove(aid);
+                }
+                if (immediate) {
+                    queue.run();
+                } else {
+                    queue.schedule(50);
+                }
             }
         }
     }
@@ -381,11 +393,13 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
         private String origOverflow;
         private boolean isWindow = false;
         private Element shadow;
+        private String data;
 
-        public RollAnimation(Widget w, String type, int aid) {
+        public RollAnimation(Widget w, String type, int aid, String data) {
             target = w;
             this.type = type;
             this.aid = aid;
+            this.data = data;
             if (type.indexOf("up") > 0 || type.indexOf("down") > 0) {
                 dir = type.indexOf("open") > 0 ? 1 : -1;
             } else {
@@ -497,14 +511,17 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
             if (target instanceof HasWidgets) {
                 client.runDescendentsLayout((HasWidgets) target);
             }
-            animEvents.put(aid + "", type + ",cancelled=true");
-            if (!cancellingAll) {
-                animations.remove(aid);
-            }
-            if (immediate) {
-                queue.run();
-            } else {
-                queue.schedule(50);
+
+            if (data != null && !data.contains("ignoreCancel")) {
+                animEvents.put(aid + "", type + ",cancelled=true");
+                if (!cancellingAll) {
+                    animations.remove(aid);
+                }
+                if (immediate) {
+                    queue.run();
+                } else {
+                    queue.schedule(50);
+                }
             }
         }
     }
@@ -713,15 +730,20 @@ public class VAnimatorProxy extends SimplePanel implements Paintable {
                 client.runDescendentsLayout((HasWidgets) target);
             }
             Util.notifyParentOfSizeChange(target, true);
-            animEvents.put(aid + "", AnimType.SIZE.toString() + ",width="
-                    + endWidth + ",height=" + endHeight + ",cancelled=true");
-            if (!cancellingAll) {
-                animations.remove(aid);
-            }
-            if (immediate) {
-                queue.run();
-            } else {
-                queue.schedule(50);
+
+            if (data != null && !data.contains("ignoreCancel")) {
+                animEvents
+                        .put(aid + "", AnimType.SIZE.toString() + ",width="
+                                + endWidth + ",height=" + endHeight
+                                + ",cancelled=true");
+                if (!cancellingAll) {
+                    animations.remove(aid);
+                }
+                if (immediate) {
+                    queue.run();
+                } else {
+                    queue.schedule(50);
+                }
             }
         }
     }
