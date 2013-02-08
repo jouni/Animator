@@ -15,7 +15,7 @@ import com.vaadin.client.ui.VCustomComponent;
  * Client side widget which communicates with the server. Messages from the
  * server are shown as HTML and mouse clicks are sent to the server.
  */
-public class VLegacyAnimator extends VCustomComponent implements Paintable {
+public class VAnimator extends VCustomComponent implements Paintable {
 
     private static final String ATTR_SUFFIX_DELAY = "delay";
     private static final String ATTR_SUFFIX_DURATION = "duration";
@@ -43,7 +43,7 @@ public class VLegacyAnimator extends VCustomComponent implements Paintable {
     protected ApplicationConnection client;
     private boolean immediate;
 
-    public VLegacyAnimator() {
+    public VAnimator() {
         super();
         // Disallow styling of the Animator element
         setStyleName("");

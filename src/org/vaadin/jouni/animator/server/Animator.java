@@ -1,79 +1,184 @@
 package org.vaadin.jouni.animator.server;
 
-import org.vaadin.jouni.animator.shared.AnimationType;
-import org.vaadin.jouni.animator.shared.AnimatorState;
+import java.util.Map;
 
-import com.vaadin.server.AbstractExtension;
-import com.vaadin.ui.AbstractComponent;
+import org.vaadin.jouni.animator.client.VAnimator;
 
-public class Animator extends AbstractExtension {
+import com.vaadin.server.PaintException;
+import com.vaadin.server.PaintTarget;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.LegacyComponent;
 
-    public Animator() {
+/**
+ * Server side component for the VLegacyAnimator widget.
+ * 
+ * @deprecated Use the Animator extension instead, it provides additional
+ *             functionality to this component, without the extra wrapper
+ *             component.
+ */
+public class Animator extends CustomComponent implements LegacyComponent {
 
+    private static final long serialVersionUID = 9147461261436068140L;
+
+    private boolean fadeInRequested = false;
+    private boolean fadeOutRequested = false;
+    private boolean rollDownRequested = false;
+    private boolean rollUpRequested = false;
+
+    private int fadeDuration = 200;
+    private int rollDuration = 200;
+
+    private int fadeDelay = 0;
+    private int rollDelay = 0;
+
+    private boolean fadedOut = false;
+    private boolean rolledUp = false;
+
+    public Animator(Component toAnimate) {
+        setSizeUndefined();
+        setCompositionRoot(toAnimate);
     }
 
-    public Animator(AbstractComponent target) {
-        extend(target);
+    public Animator setContent(Component toAnimate) {
+        setCompositionRoot(toAnimate);
+        requestRepaint();
+        return this;
+    }
+
+    public Animator fadeIn() {
+        fadeIn(200, 0);
+        return this;
+    }
+
+    public Animator fadeIn(int duration, int delay) {
+        fadeInRequested = true;
+        fadeOutRequested = false;
+        fadeDuration = duration;
+        fadeDelay = delay;
+        requestRepaint();
+        return this;
+    }
+
+    public Animator fadeOut() {
+        fadeOut(200, 0);
+        return this;
+    }
+
+    public Animator fadeOut(int duration, int delay) {
+        fadeInRequested = false;
+        fadeOutRequested = true;
+        fadeDuration = duration;
+        fadeDelay = delay;
+        requestRepaint();
+        return this;
+    }
+
+    public Animator rollDown() {
+        rollDown(200, 0);
+        return this;
+    }
+
+    public Animator rollDown(int duration, int delay) {
+        rollDownRequested = true;
+        rollUpRequested = false;
+        rollDuration = duration;
+        rollDelay = delay;
+        requestRepaint();
+        return this;
+    }
+
+    public Animator rollUp() {
+        rollUp(200, 0);
+        return this;
+    }
+
+    public Animator rollUp(int duration, int delay) {
+        rollDownRequested = false;
+        rollUpRequested = true;
+        rollDuration = duration;
+        rollDelay = delay;
+        requestRepaint();
+        return this;
+    }
+
+    public void paintContent(PaintTarget target) throws PaintException {
+
+        // super.paintContent(target);
+
+        if (fadeInRequested || fadeOutRequested) {
+            target.addAttribute(VAnimator.ATTR_FADE, fadeInRequested ? 1
+                    : -1);
+            target.addAttribute(VAnimator.ATTR_FADE_DURATION,
+                    fadeDuration);
+            target.addAttribute(VAnimator.ATT_FADE_DELAY, fadeDelay);
+        }
+
+        if (rollDownRequested || rollUpRequested) {
+            target.addAttribute(VAnimator.ATTR_ROLL,
+                    rollDownRequested ? 1 : -1);
+            target.addAttribute(VAnimator.ATTR_ROLL_DURATION,
+                    rollDuration);
+            target.addAttribute(VAnimator.ATT_ROLL_DELAY, rollDelay);
+        }
+
+        if (isFadedOut()) {
+            target.addAttribute(VAnimator.ATTR_FADED_OUT, true);
+        }
+        if (isRolledUp()) {
+            target.addAttribute(VAnimator.ATTR_ROLLED_UP, true);
+        }
+
+        clearRequests();
+    }
+
+    private void clearRequests() {
+        fadeInRequested = false;
+        fadeOutRequested = false;
+        rollDownRequested = false;
+        rollUpRequested = false;
     }
 
     @Override
-    public AnimatorState getState() {
-        return (AnimatorState) super.getState();
+    public void changeVariables(Object source, Map<String, Object> variables) {
+        if (variables.containsKey(VAnimator.VAR_FADED_OUT)) {
+            fadedOut = ((Boolean) variables.get(VAnimator.VAR_FADED_OUT))
+                    .booleanValue();
+        }
+        if (variables.containsKey(VAnimator.VAR_ROLLED_UP)) {
+            rolledUp = ((Boolean) variables.get(VAnimator.VAR_ROLLED_UP))
+                    .booleanValue();
+        }
     }
 
-    /**
-     * Add a new animation to this Animator's queue.
-     * 
-     * @param animation
-     * @param params
-     *            specify the duration and delay for the animation (in
-     *            milliseconds).
-     *            <p>
-     *            Both are optional. The default values are 200 (duration) and 0
-     *            (delay).
-     *            <p>
-     *            If you want to specify the delay, you need to specify the
-     *            duration also:
-     *            <p>
-     * 
-     *            <pre>
-     * // The animation will be run immediately
-     * // and it will last for 200 ms (default)
-     * animator.fadeIn();
-     * 
-     * // The animation will be run immediately
-     * // and it will last for 500 ms
-     * animator.fadeIn(500);
-     * 
-     * // The animation will be run after 1 second and it will last for 200 ms
-     * animator.fadeIn(200, 1000);
-     * </pre>
-     * @return this Animator instance
-     */
-    public Animator addAnimation(Animation animation, int... params) {
-        if (params.length == 1) {
-            animation.setDuration(params[0]);
-        } else if (params.length == 2) {
-            animation.setDuration(params[0]);
-            animation.setDelay(params[1]);
-        }
-        getState().queue.add(animation.getState());
+    public boolean isRolledUp() {
+        return rolledUp;
+    }
+
+    public boolean isFadedOut() {
+        return fadedOut;
+    }
+
+    public Animator setRolledUp(boolean rolledUp) {
+        this.rolledUp = rolledUp;
+        requestRepaint();
+        return this;
+    }
+
+    public Animator setFadedOut(boolean fadedOut) {
+        this.fadedOut = fadedOut;
+        requestRepaint();
         return this;
     }
 
     /**
-     * Fades in the target component.
+     * Cancels all requested animations that have yet to be run.
      * 
-     * See the {@link #addAnimation(Animation, int...)} documentation for
-     * parameter values.
-     * 
-     * @return the new {@link Animation} instance which was created and added to
-     *         this Animator's queue.
+     * @return the instance of the Animator
      */
-    public Animation fadeIn(int... params) {
-        Animation animation = new Animation(AnimationType.FADE_IN);
-        addAnimation(animation, params);
-        return animation;
+    public Animator cancelAll() {
+        clearRequests();
+        return this;
     }
 
 }

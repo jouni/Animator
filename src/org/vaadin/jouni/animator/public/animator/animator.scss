@@ -1,22 +1,3 @@
-@import "keyframes.css";
-
-@mixin animation($name, $duration: 200ms, $func: ease-in-out) {
-	-webkit-animation-name: $name;
-	-webkit-animation-duration: $duration;
-	-webkit-animation-iteration-count: 1;
-	-webkit-animation-timing-function: $func;
-	
-	-moz-animation-name: $name;
-	-moz-animation-duration: $duration;
-	-moz-animation-iteration-count: 1;
-	-moz-animation-timing-function: $func;
-}
-
-.v-animate-fade-in {
-	@include animation(fade-in);
-}
-
-
 .v-anim-fade-in,
 .v-anim-fade-in-pop {
 	opacity: 0 !important;
