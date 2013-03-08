@@ -1,8 +1,9 @@
+/* TODO still not working properly with the Sass compiler */
 /*@mixin keyframes ($name) {
-		@-webkit-keyframes $name {
+		@-webkit-keyframes #{$name} {
 			@content;
 		}
-		@-moz-keyframes $name {
+		@-moz-keyframes #{$name} {
 			@content;
 		}
 }

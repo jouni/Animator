@@ -1,4 +1,4 @@
-package org.vaadin.jouni.animator.server;
+package org.vaadin.jouni.animator.animations;
 
 import org.vaadin.jouni.animator.shared.AnimationState;
 import org.vaadin.jouni.animator.shared.AnimationType;
@@ -10,12 +10,12 @@ public class Animation {
     private AnimationState state = new AnimationState();
 
     public Animation() {
-        state.setId(idCount++);
+        state.id = idCount++;
     }
 
     public Animation(AnimationType type) {
         super();
-        state.setType(type);
+        state.type = type;
     }
 
     public AnimationState getState() {
@@ -23,43 +23,43 @@ public class Animation {
     }
 
     public Animation setDuration(int millis) {
-        state.setDuration(millis);
+        state.duration = millis;
         return this;
     }
 
     public Animation setDelay(int millis) {
-        state.setDelay(millis);
+        state.delay = millis;
         return this;
     }
 
     public Animation setData(String data) {
-        state.setData(data);
+        state.data = data;
         return this;
     }
 
     public int getDuration() {
-        return state.getDuration();
+        return state.duration;
     }
 
     public int getDelay() {
-        return state.getDelay();
+        return state.delay;
     }
 
     public AnimationType getType() {
-        return state.getType();
+        return state.type;
     }
 
     public String getData() {
-        return state.getData();
+        return state.data;
     }
 
     public Animation cancel() {
-        state.setCancelled(true);
+        state.cancelled = true;
         return this;
     }
 
     public boolean isCancelled() {
-        return state.isCancelled();
+        return state.cancelled;
     }
 
     @Override

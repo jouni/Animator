@@ -4,8 +4,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.vaadin.jouni.animator.Animator;
 import org.vaadin.jouni.animator.client.animations.FadeIn;
-import org.vaadin.jouni.animator.server.Animator;
 import org.vaadin.jouni.animator.shared.AnimationState;
 import org.vaadin.jouni.animator.shared.AnimationType;
 import org.vaadin.jouni.animator.shared.AnimatorState;
@@ -49,17 +49,19 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 
         for (AnimationState anim : getState().queue) {
             // Mark any cancelled animations to be removed
-            if (anim.isCancelled()) {
+            if (anim.cancelled) {
                 remove.add(anim);
                 continue;
             }
 
             // Reduce the previous delay from this animation
-            anim.setDelay(anim.getDelay() - elapsedTime);
+            // TODO this won't work since the state can't be modified from the
+            // client
+            anim.delay = anim.delay - elapsedTime;
 
             // Check if the animation still has a delay
-            if (anim.getDelay() > 0 && anim.getDelay() < shortestDelay) {
-                shortestDelay = anim.getDelay();
+            if (anim.delay > 0 && anim.delay < shortestDelay) {
+                shortestDelay = anim.delay;
             } else {
                 // Run the animation instantly
                 runAnimation(anim);
@@ -89,10 +91,10 @@ public class AnimatorConnector extends AbstractExtensionConnector {
     }
 
     void runAnimation(AnimationState anim) {
-        if (anim.getType() == AnimationType.FADE_IN) {
-            new FadeIn(widget, anim.getDuration(), anim.getId());
+        if (anim.type == AnimationType.FADE_IN) {
+            new FadeIn(widget, anim.duration, anim.id);
         } else {
-            System.out.println(anim.getType());
+            System.out.println(anim.type);
         }
     }
 }

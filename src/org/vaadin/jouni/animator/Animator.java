@@ -1,12 +1,13 @@
-package org.vaadin.jouni.animator.server;
+package org.vaadin.jouni.animator;
 
+import org.vaadin.jouni.animator.animations.Animation;
 import org.vaadin.jouni.animator.shared.AnimatorState;
 
 import com.vaadin.annotations.StyleSheet;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.UI;
 
-@StyleSheet("animator.css")
+@StyleSheet("css/animator.css")
 public class Animator extends AbstractExtension {
 
     private Animator() {
@@ -60,4 +61,5 @@ public class Animator extends AbstractExtension {
         getState().queue.add(animation.getState());
         return this;
 
+    }
 }
