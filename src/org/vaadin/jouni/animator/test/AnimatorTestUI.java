@@ -1,40 +1,36 @@
-package org.vaadin.jouni.animator.demo;
+package org.vaadin.jouni.animator.test;
 
+import org.vaadin.jouni.animator.client.animations.FadeIn;
 import org.vaadin.jouni.animator.server.Animator;
-import org.vaadin.jouni.animator.server.Disclosure;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @Theme("runo")
-public class AnimatorDemo extends UI {
+public class AnimatorTestUI extends UI {
     @Override
     public void init(VaadinRequest request) {
         setContent(new VerticalLayout() {
             {
+                final Animator animator = new Animator(getUI());
 
-                Button button = new Button("Animate Me");
+                final Button button = new Button("Animate Me");
                 addComponent(button);
-
-                final Animator animator = new Animator(button);
-                animator.fadeIn(3000);
 
                 button.addClickListener(new ClickListener() {
                     @Override
                     public void buttonClick(ClickEvent event) {
-                        animator.fadeIn();
+                        animator.fadeIn(event.getButton()).when(Event.CLICK,
+                                getUI());
+
+                        new FadeIn(button).when(Event.CLICK, getUI());
                     }
                 });
-
-                Disclosure d = new Disclosure("Open");
-                d.addComponent(new Label("It's just me in here!"));
-                addComponent(d);
 
             }
         });

@@ -14,7 +14,7 @@
 		<servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
 		<init-param>
 			<param-name>UI</param-name>
-			<param-value>org.vaadin.jouni.animator.demo.AnimatorTestUI</param-value>
+			<param-value>org.vaadin.jouni.animator.test.AnimatorTestUI</param-value>
 		</init-param>
 		<init-param>
 			<param-name>widgetset</param-name>
@@ -30,22 +30,6 @@
 		<url-pattern>/VAADIN/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>Animator Demo</servlet-name>
-		<servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
-		<init-param>
-			<param-name>UI</param-name>
-			<param-value>org.vaadin.jouni.animator.demo.AnimatorDemoUI</param-value>
-		</init-param>
-		<init-param>
-			<param-name>widgetset</param-name>
-			<param-value>org.vaadin.jouni.animator.AnimatorWidgetset</param-value>
-		</init-param>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Animator Demo</servlet-name>
-		<url-pattern>/demo/*</url-pattern>
-	</servlet-mapping>
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

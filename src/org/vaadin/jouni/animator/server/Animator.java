@@ -1,18 +1,18 @@
 package org.vaadin.jouni.animator.server;
 
-import org.vaadin.jouni.animator.shared.AnimationType;
 import org.vaadin.jouni.animator.shared.AnimatorState;
 
+import com.vaadin.annotations.StyleSheet;
 import com.vaadin.server.AbstractExtension;
-import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.UI;
 
+@StyleSheet("animator.css")
 public class Animator extends AbstractExtension {
 
-    public Animator() {
-
+    private Animator() {
     }
 
-    public Animator(AbstractComponent target) {
+    public Animator(UI target) {
         extend(target);
     }
 
@@ -59,21 +59,5 @@ public class Animator extends AbstractExtension {
         }
         getState().queue.add(animation.getState());
         return this;
-    }
-
-    /**
-     * Fades in the target component.
-     * 
-     * See the {@link #addAnimation(Animation, int...)} documentation for
-     * parameter values.
-     * 
-     * @return the new {@link Animation} instance which was created and added to
-     *         this Animator's queue.
-     */
-    public Animation fadeIn(int... params) {
-        Animation animation = new Animation(AnimationType.FADE_IN);
-        addAnimation(animation, params);
-        return animation;
-    }
 
 }
