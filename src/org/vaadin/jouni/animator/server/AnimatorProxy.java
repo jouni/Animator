@@ -6,7 +6,7 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.vaadin.jouni.animator.client.VAnimatorProxy;
-import org.vaadin.jouni.animator.client.VAnimatorProxy.AnimType;
+import org.vaadin.jouni.animator.shared.AnimType;
 
 import com.vaadin.event.EventRouter;
 import com.vaadin.server.PaintException;
@@ -21,8 +21,6 @@ import com.vaadin.util.ReflectTools;
 /**
  * Server side component for the VAnimator widget.
  * 
- * @deprecated Use the Animator extension instead, which provides the same
- *             functionality but without the extra invisible UI component.
  */
 public class AnimatorProxy extends AbstractComponent implements LegacyComponent {
 

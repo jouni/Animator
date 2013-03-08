@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
 <module>
-	
+
+	<source path="shared" />
 	<source path="client" />
 
-	<inherits name="com.vaadin.DefaultWidgetSet" />
 	<stylesheet src="animator/animator.css" />
+	
+	<inherits name="com.vaadin.DefaultWidgetSet" />
 	
     <!--
      Uncomment the following to compile the widgetset for one browser only.

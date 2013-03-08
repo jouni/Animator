@@ -2,6 +2,8 @@ package org.vaadin.jouni.animator.client;
 
 import java.util.Date;
 
+import org.vaadin.jouni.animator.shared.AnimatorConstants;
+
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.user.client.DOM;
@@ -16,25 +18,6 @@ import com.vaadin.client.ui.VCustomComponent;
  * server are shown as HTML and mouse clicks are sent to the server.
  */
 public class VAnimator extends VCustomComponent implements Paintable {
-
-    private static final String ATTR_SUFFIX_DELAY = "delay";
-    private static final String ATTR_SUFFIX_DURATION = "duration";
-
-    public static final String ATTR_FADE = "fade";
-    public static final String ATTR_FADE_DURATION = ATTR_FADE
-            + ATTR_SUFFIX_DURATION;
-    public static final String ATT_FADE_DELAY = ATTR_FADE + ATTR_SUFFIX_DELAY;
-
-    public static final String ATTR_ROLL = "roll";
-    public static final String ATTR_ROLL_DURATION = ATTR_ROLL
-            + ATTR_SUFFIX_DURATION;
-    public static final String ATT_ROLL_DELAY = ATTR_ROLL + ATTR_SUFFIX_DELAY;
-
-    public static final String ATTR_ROLLED_UP = "rolled";
-    public static final String VAR_ROLLED_UP = "isRolled";
-
-    public static final String ATTR_FADED_OUT = "faded";
-    public static final String VAR_FADED_OUT = "isFaded";
 
     /** The client side widget identifier */
     protected String paintableId;
@@ -57,25 +40,27 @@ public class VAnimator extends VCustomComponent implements Paintable {
         this.client = client;
         immediate = uidl.hasAttribute("immediate");
 
-        if (uidl.hasAttribute(ATTR_FADE)) {
+        if (uidl.hasAttribute(AnimatorConstants.ATTR_FADE)) {
             DOM.setStyleAttribute(getElement(), "visibility", "");
-            int dir = uidl.getIntAttribute(ATTR_FADE);
-            int duration = uidl.getIntAttribute(ATTR_FADE_DURATION);
-            int delay = uidl.getIntAttribute(ATT_FADE_DELAY);
+            int dir = uidl.getIntAttribute(AnimatorConstants.ATTR_FADE);
+            int duration = uidl
+                    .getIntAttribute(AnimatorConstants.ATTR_FADE_DURATION);
+            int delay = uidl.getIntAttribute(AnimatorConstants.ATT_FADE_DELAY);
             fade.setDir(dir);
             fade.run(duration, new Date().getTime() + delay);
-        } else if (uidl.hasAttribute(ATTR_FADED_OUT)) {
+        } else if (uidl.hasAttribute(AnimatorConstants.ATTR_FADED_OUT)) {
             DOM.setStyleAttribute(getElement(), "visibility", "hidden");
         }
 
-        if (uidl.hasAttribute(ATTR_ROLL)) {
+        if (uidl.hasAttribute(AnimatorConstants.ATTR_ROLL)) {
             DOM.setStyleAttribute(getElement(), "height", "");
-            int dir = uidl.getIntAttribute(ATTR_ROLL);
-            int duration = uidl.getIntAttribute(ATTR_ROLL_DURATION);
-            int delay = uidl.getIntAttribute(ATT_ROLL_DELAY);
+            int dir = uidl.getIntAttribute(AnimatorConstants.ATTR_ROLL);
+            int duration = uidl
+                    .getIntAttribute(AnimatorConstants.ATTR_ROLL_DURATION);
+            int delay = uidl.getIntAttribute(AnimatorConstants.ATT_ROLL_DELAY);
             roll.setDir(dir);
             roll.run(duration, new Date().getTime() + delay);
-        } else if (uidl.hasAttribute(ATTR_ROLLED_UP)) {
+        } else if (uidl.hasAttribute(AnimatorConstants.ATTR_ROLLED_UP)) {
             DOM.setStyleAttribute(getElement(), "height", "0");
         }
 
@@ -129,8 +114,8 @@ public class VAnimator extends VCustomComponent implements Paintable {
                 // TODO
                 // DOM.setStyleAttribute(getElement(), "-ms-filter", "");
             }
-            client.updateVariable(paintableId, VAR_FADED_OUT, dir < 0,
-                    immediate);
+            client.updateVariable(paintableId, AnimatorConstants.VAR_FADED_OUT,
+                    dir < 0, immediate);
         }
 
         @Override
@@ -177,8 +162,8 @@ public class VAnimator extends VCustomComponent implements Paintable {
             if (dir > 0) {
                 DOM.setStyleAttribute(getElement(), "height", "");
             }
-            client.updateVariable(paintableId, VAR_ROLLED_UP, dir < 0,
-                    immediate);
+            client.updateVariable(paintableId, AnimatorConstants.VAR_ROLLED_UP,
+                    dir < 0, immediate);
         }
 
         @Override

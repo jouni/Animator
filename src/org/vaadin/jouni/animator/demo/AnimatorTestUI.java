@@ -1,12 +1,12 @@
 package org.vaadin.jouni.animator.demo;
 
-import org.vaadin.jouni.animator.client.VAnimatorProxy.AnimType;
+import org.vaadin.jouni.animator.server.Animator;
 import org.vaadin.jouni.animator.server.AnimatorProxy;
 import org.vaadin.jouni.animator.server.AnimatorProxy.Animation;
 import org.vaadin.jouni.animator.server.AnimatorProxy.AnimationEvent;
 import org.vaadin.jouni.animator.server.AnimatorProxy.AnimationListener;
 import org.vaadin.jouni.animator.server.Disclosure;
-import org.vaadin.jouni.animator.server.Animator;
+import org.vaadin.jouni.animator.shared.AnimType;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -25,6 +25,7 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -225,9 +226,9 @@ public class AnimatorTestUI extends UI {
     }
 
     private Layout proxyDemo() {
-        CssLayout root = new CssLayout();
-        root.setWidth("100%");
-        // root.setMargin(true);
+        VerticalLayout root = new VerticalLayout();
+        root.setMargin(true);
+        root.setSpacing(true);
 
         /* Disclosure */
         HorizontalLayout layout = new HorizontalLayout();
@@ -277,9 +278,8 @@ public class AnimatorTestUI extends UI {
         layout.addComponent(text);
         layout.setExpandRatio(text, 1.5f);
 
-        final CssLayout demo2 = new CssLayout();
-        demo2.setWidth("100%");
-        // demo2.setMargin(true, false, true, false);
+        final VerticalLayout demo2 = new VerticalLayout();
+        demo2.setMargin(true);
 
         Button add = new Button("Add new content", new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {

@@ -27,12 +27,14 @@
 
 
 /* Disclosure component styles */
-.v-disclosure .v-csslayout-margin {
+.v-disclosure {
 	padding-left: 12px;
 	padding-bottom: 5px;
+	vertical-align: top;
 	}
 
 .v-disclosure-caption {
+	display: block;
 	margin-left: -12px;
 	height: 18px;
 	}
@@ -48,3 +50,7 @@
 .v-disclosure-caption-open .v-button-caption {
 	background-position: -9px -11px;
 	}
+
+.v-disclosure > .v-widget {
+	vertical-align: top;
+}

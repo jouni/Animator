@@ -1,20 +1,12 @@
 package org.vaadin.jouni.animator.client;
 
-import org.vaadin.jouni.animator.server.Animator;
-
-import com.google.gwt.core.client.GWT;
 import com.vaadin.client.ApplicationConnection;
 import com.vaadin.client.UIDL;
 import com.vaadin.client.ui.LegacyConnector;
 import com.vaadin.shared.ui.Connect;
 
-@Connect(Animator.class)
-public class LegacyAnimatorConnector extends LegacyConnector {
-
-    @Override
-    protected VAnimator createWidget() {
-        return GWT.create(VAnimator.class);
-    }
+@Connect(org.vaadin.jouni.animator.server.Animator.class)
+public class AnimatorConnector extends LegacyConnector {
 
     @Override
     public VAnimator getWidget() {

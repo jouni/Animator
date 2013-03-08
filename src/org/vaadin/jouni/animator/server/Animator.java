@@ -2,7 +2,7 @@ package org.vaadin.jouni.animator.server;
 
 import java.util.Map;
 
-import org.vaadin.jouni.animator.client.VAnimator;
+import org.vaadin.jouni.animator.shared.AnimatorConstants;
 
 import com.vaadin.server.PaintException;
 import com.vaadin.server.PaintTarget;
@@ -13,9 +13,6 @@ import com.vaadin.ui.LegacyComponent;
 /**
  * Server side component for the VLegacyAnimator widget.
  * 
- * @deprecated Use the Animator extension instead, it provides additional
- *             functionality to this component, without the extra wrapper
- *             component.
  */
 public class Animator extends CustomComponent implements LegacyComponent {
 
@@ -107,26 +104,26 @@ public class Animator extends CustomComponent implements LegacyComponent {
         // super.paintContent(target);
 
         if (fadeInRequested || fadeOutRequested) {
-            target.addAttribute(VAnimator.ATTR_FADE, fadeInRequested ? 1
-                    : -1);
-            target.addAttribute(VAnimator.ATTR_FADE_DURATION,
+            target.addAttribute(AnimatorConstants.ATTR_FADE,
+                    fadeInRequested ? 1 : -1);
+            target.addAttribute(AnimatorConstants.ATTR_FADE_DURATION,
                     fadeDuration);
-            target.addAttribute(VAnimator.ATT_FADE_DELAY, fadeDelay);
+            target.addAttribute(AnimatorConstants.ATT_FADE_DELAY, fadeDelay);
         }
 
         if (rollDownRequested || rollUpRequested) {
-            target.addAttribute(VAnimator.ATTR_ROLL,
+            target.addAttribute(AnimatorConstants.ATTR_ROLL,
                     rollDownRequested ? 1 : -1);
-            target.addAttribute(VAnimator.ATTR_ROLL_DURATION,
+            target.addAttribute(AnimatorConstants.ATTR_ROLL_DURATION,
                     rollDuration);
-            target.addAttribute(VAnimator.ATT_ROLL_DELAY, rollDelay);
+            target.addAttribute(AnimatorConstants.ATT_ROLL_DELAY, rollDelay);
         }
 
         if (isFadedOut()) {
-            target.addAttribute(VAnimator.ATTR_FADED_OUT, true);
+            target.addAttribute(AnimatorConstants.ATTR_FADED_OUT, true);
         }
         if (isRolledUp()) {
-            target.addAttribute(VAnimator.ATTR_ROLLED_UP, true);
+            target.addAttribute(AnimatorConstants.ATTR_ROLLED_UP, true);
         }
 
         clearRequests();
@@ -141,13 +138,13 @@ public class Animator extends CustomComponent implements LegacyComponent {
 
     @Override
     public void changeVariables(Object source, Map<String, Object> variables) {
-        if (variables.containsKey(VAnimator.VAR_FADED_OUT)) {
-            fadedOut = ((Boolean) variables.get(VAnimator.VAR_FADED_OUT))
-                    .booleanValue();
+        if (variables.containsKey(AnimatorConstants.VAR_FADED_OUT)) {
+            fadedOut = ((Boolean) variables
+                    .get(AnimatorConstants.VAR_FADED_OUT)).booleanValue();
         }
-        if (variables.containsKey(VAnimator.VAR_ROLLED_UP)) {
-            rolledUp = ((Boolean) variables.get(VAnimator.VAR_ROLLED_UP))
-                    .booleanValue();
+        if (variables.containsKey(AnimatorConstants.VAR_ROLLED_UP)) {
+            rolledUp = ((Boolean) variables
+                    .get(AnimatorConstants.VAR_ROLLED_UP)).booleanValue();
         }
     }
 

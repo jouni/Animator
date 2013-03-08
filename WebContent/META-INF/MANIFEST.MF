@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Vaadin-License-Title: Apache 2.0
 Implementation-Vendor: Jouni Koivuviita
 Implementation-Title: Animator
-Implementation-Version: 1.7.2
+Implementation-Version: 1.7.3
 Vaadin-Package-Version: 1
 Class-Path: 
 Vaadin-Widgetsets: org.vaadin.jouni.animator.AnimatorWidgetset
