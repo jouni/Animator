@@ -1,4 +1,4 @@
-package org.vaadin.jouni.animator.server;
+package org.vaadin.jouni.animator;
 
 import java.lang.reflect.Method;
 import java.util.Map;

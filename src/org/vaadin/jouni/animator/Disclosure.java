@@ -1,4 +1,4 @@
-package org.vaadin.jouni.animator.server;
+package org.vaadin.jouni.animator;
 
 import org.vaadin.jouni.animator.shared.AnimType;
 

@@ -1,11 +1,11 @@
 package org.vaadin.jouni.animator.demo;
 
-import org.vaadin.jouni.animator.server.Animator;
-import org.vaadin.jouni.animator.server.AnimatorProxy;
-import org.vaadin.jouni.animator.server.AnimatorProxy.Animation;
-import org.vaadin.jouni.animator.server.AnimatorProxy.AnimationEvent;
-import org.vaadin.jouni.animator.server.AnimatorProxy.AnimationListener;
-import org.vaadin.jouni.animator.server.Disclosure;
+import org.vaadin.jouni.animator.Animator;
+import org.vaadin.jouni.animator.AnimatorProxy;
+import org.vaadin.jouni.animator.Disclosure;
+import org.vaadin.jouni.animator.AnimatorProxy.Animation;
+import org.vaadin.jouni.animator.AnimatorProxy.AnimationEvent;
+import org.vaadin.jouni.animator.AnimatorProxy.AnimationListener;
 import org.vaadin.jouni.animator.shared.AnimType;
 
 import com.vaadin.annotations.Theme;

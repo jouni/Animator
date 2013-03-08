@@ -5,7 +5,7 @@ import com.vaadin.client.UIDL;
 import com.vaadin.client.ui.LegacyConnector;
 import com.vaadin.shared.ui.Connect;
 
-@Connect(org.vaadin.jouni.animator.server.Animator.class)
+@Connect(org.vaadin.jouni.animator.Animator.class)
 public class AnimatorConnector extends LegacyConnector {
 
     @Override

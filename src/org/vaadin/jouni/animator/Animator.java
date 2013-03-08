@@ -1,4 +1,4 @@
-package org.vaadin.jouni.animator.server;
+package org.vaadin.jouni.animator;
 
 import java.util.Map;
 
