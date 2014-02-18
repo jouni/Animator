@@ -1,40 +1,39 @@
 package org.vaadin.jouni.animator.test;
 
 import org.vaadin.jouni.animator.Animator;
+import org.vaadin.jouni.animator.Dom;
+import org.vaadin.jouni.animator.client.ClientEvent;
+import org.vaadin.jouni.animator.client.Css;
 
-import com.vaadin.annotations.Theme;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-@Theme("runo")
 public class AnimatorTestUI extends UI {
     @Override
     public void init(VaadinRequest request) {
-        final UI ui = this;
         setContent(new VerticalLayout() {
+            Label label = new Label("Animate Me");
+            Animator animator = new Animator(label);
             {
-                final Animator animator = new Animator(ui);
 
-                final Button button = new Button("Animate Me");
-                addComponent(button);
+                new Dom(label).tabIndex(0);
+                label.setSizeUndefined();
 
-                button.addClickListener(new ClickListener() {
-                    @Override
-                    public void buttonClick(ClickEvent event) {
-                        // animator.fadeIn(event.getButton()).when(Event.CLICK,
-                        // getUI());
-                        //
-                        // new FadeIn(button).when(Event.CLICK, getUI());
-                    }
-                });
+                animator.animateOn(null, null, new Css().translateY("100%"))
+                        .duration(500);
+
+                animator.animateOn(null, ClientEvent.FOCUS,
+                        new Css().translateX("100%").scale(1.5)).duration(1500);
+
+                animator.animateOn(null, ClientEvent.BLUR,
+                        new Css().translateX("0").scale(1)).duration(300);
+
+                addComponent(label);
 
             }
         });
 
     }
-
 }
