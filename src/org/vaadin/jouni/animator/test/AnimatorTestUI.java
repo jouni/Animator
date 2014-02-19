@@ -4,6 +4,7 @@ import org.vaadin.jouni.animator.Animator;
 import org.vaadin.jouni.animator.Dom;
 import org.vaadin.jouni.animator.client.ClientEvent;
 import org.vaadin.jouni.animator.client.Css;
+import org.vaadin.jouni.animator.client.Ease;
 
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Label;
@@ -18,15 +19,15 @@ public class AnimatorTestUI extends UI {
 			Animator animator = new Animator(label);
 			{
 
-				new Dom(label).tabIndex(0).style().translateY("200%");
+				new Dom(label).tabIndex(0).style().translateY("1600%");
 				label.setSizeUndefined();
 
-				// animator.animateOn(null, null, new Css().translateY("100%"))
-				// .duration(1500);
+				animator.animateOn(null, null, new Css().translateY("100%"))
+						.duration(1500).ease(Ease.OUT);
 
-				animator.animateOn(null, null,
-						new Css().translateX("100%").rotate(20)).duration(1000)
-						.delay(1000);
+				 animator.animateOn(null, null,
+				 new Css().opacity(0.3)).duration(300)
+				 .delay(1000);
 
 				animator.animateOn(null, ClientEvent.FOCUS,
 						new Css().translateX("100%").scale(1.5)).duration(1500);

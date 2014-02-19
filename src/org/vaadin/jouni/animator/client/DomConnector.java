@@ -142,12 +142,6 @@ public class DomConnector extends AbstractExtensionConnector {
 		applyAttributes();
 	}
 
-	public static String prefixPropertyName(String propName) {
-		if (propName.startsWith("transform"))
-			propName = propName.replace("transform", transformProperty);
-		return propName;
-	}
-
 	public void applyStyles() {
 		applyStyles(getState().css.properties, targetElement);
 	}
@@ -181,21 +175,13 @@ public class DomConnector extends AbstractExtensionConnector {
 	    return text.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
 	}-*/;
 
-	public static String domPropertyName(String cssPropertyName) {
-		return toCamelCase(prefixPropertyName(cssPropertyName));
+	public static String prefixPropertyName(String propName) {
+		if (propName.startsWith("transform"))
+			propName = propName.replace("transform", transformProperty);
+		return propName;
 	}
 
-	@Override
-	public void onUnregister() {
-		// for (String propName : getState().css.properties.keySet()) {
-		// String value = getState().css.properties.get(propName);
-		// propName = toCamelCase(prefixPropertyName(propName));
-		// if (targetStyle.getProperty(propName) != null
-		// && targetStyle.getProperty(propName).equals(value)) {
-		// targetStyle.clearProperty(propName);
-		// }
-		// }
-		// TODO clear attributes
-		super.onUnregister();
+	public static String domPropertyName(String cssPropertyName) {
+		return toCamelCase(prefixPropertyName(cssPropertyName));
 	}
 }

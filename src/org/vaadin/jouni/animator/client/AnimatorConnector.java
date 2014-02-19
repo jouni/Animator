@@ -159,7 +159,6 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 	}-*/;
 
 	void onTransitionEnd(String propertyName) {
-		log(propertyName);
 		// Remove transition for this property
 		propertyToTransition.remove(propertyName);
 		applyTransitions();
