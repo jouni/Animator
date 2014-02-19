@@ -8,32 +8,34 @@ import com.vaadin.server.AbstractExtension;
 
 public class Dom extends AbstractExtension {
 
-    public Dom(AbstractClientConnector target) {
-        extend(target);
-    }
+	private static final long serialVersionUID = 2729039463017815457L;
 
-    @Override
-    public void extend(AbstractClientConnector target) {
-        super.extend(target);
-    }
+	public Dom(AbstractClientConnector target) {
+		extend(target);
+	}
 
-    @Override
-    public DomState getState() {
-        return (DomState) super.getState();
-    }
+	@Override
+	public void extend(AbstractClientConnector target) {
+		super.extend(target);
+	}
 
-    protected Dom attribute(String attribute, String value) {
-        getState().attributes.put(attribute.toLowerCase(), value);
-        getState().increment++;
-        return this;
-    }
+	@Override
+	public DomState getState() {
+		return (DomState) super.getState();
+	}
 
-    public Dom tabIndex(int tabIndex) {
-        return attribute("tabIndex", "" + tabIndex);
-    }
+	protected Dom attribute(String attribute, String value) {
+		getState().attributes.put(attribute.toLowerCase(), value);
+		getState().increment++;
+		return this;
+	}
 
-    public Css style() {
-        getState().increment++;
-        return getState().css;
-    }
+	public Dom tabIndex(int tabIndex) {
+		return attribute("tabIndex", "" + tabIndex);
+	}
+
+	public Css style() {
+		getState().increment++;
+		return getState().css;
+	}
 }

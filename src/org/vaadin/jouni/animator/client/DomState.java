@@ -2,13 +2,17 @@ package org.vaadin.jouni.animator.client;
 
 import java.util.HashMap;
 
-public class DomState extends com.vaadin.shared.AbstractComponentState {
+import com.vaadin.shared.AbstractComponentState;
 
-    public Css css = new Css();
+public class DomState extends AbstractComponentState {
 
-    public HashMap<String, String> attributes = new HashMap<String, String>();
+	private static final long serialVersionUID = 7707257396804839934L;
 
-    /** Internal use only. Used to force a state change */
-    public int increment = 0;
+	public Css css = new Css();
+
+	public HashMap<String, String> attributes = new HashMap<String, String>();
+
+	/** Internal use only. Used to force a state change */
+	public int increment = 0;
 
 }

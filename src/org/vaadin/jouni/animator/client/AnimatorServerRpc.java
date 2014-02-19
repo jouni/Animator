@@ -4,6 +4,6 @@ import com.vaadin.shared.communication.ServerRpc;
 
 public interface AnimatorServerRpc extends ServerRpc {
 
-    public void animationEnd(int id);
+    public void animationEnd(CssAnimation animation);
 
 }

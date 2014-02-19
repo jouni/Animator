@@ -10,11 +10,20 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Window;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
@@ -23,6 +32,8 @@ import com.vaadin.shared.ui.Connect;
 
 @Connect(Animator.class)
 public class AnimatorConnector extends AbstractExtensionConnector {
+
+	private static final long serialVersionUID = 5590072744432016088L;
 
 	private AbstractComponentConnector target;
 	private Element targetElement;
@@ -50,12 +61,14 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 	public AnimatorConnector() {
 		registerRpc(AnimatorClientRpc.class, new AnimatorClientRpc() {
 
+			private static final long serialVersionUID = -5974716642919513367L;
+
 			@Override
 			public void animate(final CssAnimation animation) {
 
-				// TODO only use keyframe animation if the animation requires an
-				// end listener
-				// addKeyframes(animation);
+				if (animation.useKeyframeAnimation) {
+					addKeyframes(animation);
+				}
 
 				if (animation.event == null) {
 					// No event trigger, animate instantly
@@ -67,6 +80,8 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 					});
 				} else {
 					// Trigger on a particular event
+					// I really wish there was a more generic way of doing
+					// this event nonsense...
 					switch (animation.event) {
 					case BLUR:
 						target.getWidget().addDomHandler(new BlurHandler() {
@@ -84,6 +99,47 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 							}
 						}, FocusEvent.getType());
 						break;
+					case CLICK:
+						target.getWidget().addDomHandler(new ClickHandler() {
+							@Override
+							public void onClick(ClickEvent event) {
+								runAnimation(animation);
+							}
+						}, ClickEvent.getType());
+						break;
+					case MOUSE_DOWN:
+						target.getWidget().addDomHandler(
+								new MouseDownHandler() {
+									@Override
+									public void onMouseDown(MouseDownEvent event) {
+										runAnimation(animation);
+									}
+								}, MouseDownEvent.getType());
+						break;
+					case MOUSE_UP:
+						target.getWidget().addDomHandler(new MouseUpHandler() {
+							@Override
+							public void onMouseUp(MouseUpEvent event) {
+								runAnimation(animation);
+							}
+						}, MouseUpEvent.getType());
+					case MOUSE_OUT:
+						target.getWidget().addDomHandler(new MouseOutHandler() {
+							@Override
+							public void onMouseOut(MouseOutEvent event) {
+								runAnimation(animation);
+							}
+						}, MouseOutEvent.getType());
+						break;
+					case MOUSE_OVER:
+						target.getWidget().addDomHandler(
+								new MouseOverHandler() {
+									@Override
+									public void onMouseOver(MouseOverEvent event) {
+										runAnimation(animation);
+									}
+								}, MouseOverEvent.getType());
+						break;
 					}
 				}
 			}
@@ -92,23 +148,29 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 	}
 
 	void runAnimation(CssAnimation animation) {
-		// TODO only use keyframe animation when the animation has an end
-		// listener
-		// runKeyframesAnimation(animation);
+		if (animation.useKeyframeAnimation) {
+			runKeyframesAnimation(animation);
+		} else {
+			for (String propName : animation.css.properties.keySet()) {
+				String transitionValue = DomConnector
+						.prefixPropertyName(propName)
+						+ " "
+						+ animation.duration
+						+ "ms "
+						+ animation.easing.cssValue()
+						+ " "
+						+ animation.delay
+						+ "ms";
+				propertyToTransition.put(
+						DomConnector.prefixPropertyName(propName),
+						transitionValue);
 
-		// CSS transition based animation
-		for (String propName : animation.css.properties.keySet()) {
-			String transitionValue = DomConnector.prefixPropertyName(propName)
-					+ " " + animation.duration + "ms " + animation.easing + " "
-					+ animation.delay + "ms";
-			propertyToTransition.put(DomConnector.prefixPropertyName(propName),
-					transitionValue);
-
-			String value = animation.css.properties.get(propName);
-			targetStyle.setProperty(DomConnector.domPropertyName(propName),
-					value);
+				String value = animation.css.properties.get(propName);
+				targetStyle.setProperty(DomConnector.domPropertyName(propName),
+						value);
+			}
+			applyTransitions();
 		}
-		applyTransitions();
 	}
 
 	void applyTransitions() {
@@ -126,7 +188,8 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 		if (value.length() > 0)
 			value += ", ";
 		value += "animator-" + animation.id + " " + animation.duration + "ms "
-				+ animation.easing + " " + animation.delay + "ms forwards";
+				+ animation.easing.cssValue() + " " + animation.delay
+				+ "ms forwards";
 		targetStyle.setProperty(animationProperty, value);
 		queue.put("animator-" + animation.id, animation);
 	}
@@ -192,6 +255,7 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 		}
 		targetStyle.setProperty(animationProperty, newAnimProp);
 
+		rpc.animationEnd(animation);
 	}
 
 	static String buildKeyframesRule(CssAnimation animation) {

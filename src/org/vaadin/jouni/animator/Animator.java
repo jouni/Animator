@@ -1,5 +1,7 @@
 package org.vaadin.jouni.animator;
 
+import java.lang.reflect.Method;
+
 import org.vaadin.jouni.animator.client.AnimatorClientRpc;
 import org.vaadin.jouni.animator.client.AnimatorServerRpc;
 import org.vaadin.jouni.animator.client.ClientEvent;
@@ -8,83 +10,88 @@ import org.vaadin.jouni.animator.client.CssAnimation;
 
 import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.AbstractExtension;
+import com.vaadin.ui.Component;
+import com.vaadin.util.ReflectTools;
 
 public class Animator extends AbstractExtension {
 
-    // HashMap<Integer, CssAnimation> queue = new HashMap<Integer,
-    // CssAnimation>();
+	private static final long serialVersionUID = 2876055108100881743L;
 
-    private AnimatorServerRpc rpc = new AnimatorServerRpc() {
-        @Override
-        public void animationEnd(int id) {
-            // CssAnimation styles = queue.get(id);
-            // queue.remove(id);
+	private AnimatorServerRpc rpc = new AnimatorServerRpc() {
 
-            // TODO trigger listeners for given id
-        }
-    };
+		private static final long serialVersionUID = 6125808362723118718L;
 
-    public Animator(AbstractClientConnector target) {
-        super.extend(target);
-        registerRpc(rpc);
-    }
+		@Override
+		public void animationEnd(CssAnimation animation) {
+			fireAnimationEndEvent(animation);
+		}
+	};
 
-    public CssAnimation animateOn(AbstractClientConnector eventTarget,
-            ClientEvent event, Css properties) {
+	public Animator(AbstractClientConnector target) {
+		super.extend(target);
+		registerRpc(rpc);
+	}
 
-        CssAnimation anim = new CssAnimation();
-        if (eventTarget != null) {
-            anim.eventTarget = eventTarget;
-        } else {
-            anim.eventTarget = (AbstractClientConnector) getParent();
-        }
-        anim.event = event;
-        anim.css = properties;
+	public CssAnimation animateOn(AbstractClientConnector eventTarget,
+			ClientEvent event, Css properties) {
 
-        // queue.put(anim.id, anim);
+		CssAnimation anim = new CssAnimation();
+		if (eventTarget != null) {
+			anim.eventTarget = eventTarget;
+		} else {
+			anim.eventTarget = (AbstractClientConnector) getParent();
+		}
+		anim.event = event;
+		anim.css = properties;
 
-        getRpcProxy(AnimatorClientRpc.class).animate(anim);
+		// queue.put(anim.id, anim);
 
-        return anim;
-    }
+		getRpcProxy(AnimatorClientRpc.class).animate(anim);
 
-    // public Animator animate(Css styles, int duration, int delay, Ease easing)
-    // {
-    // styles.persist = true;
-    //
-    // int id = (int) (Math.random() * 10000);
-    //
-    // getRpcProxy(AnimatorClientRpc.class).animate(
-    // styles,
-    // duration,
-    // delay,
-    // easing,
-    // id,
-    // triggerOnEvent != null ? ClientEvent.valueOf(triggerOnEvent
-    // .name()) : null);
-    //
-    // triggerOnEvent = null;
-    //
-    // queue.put(id, styles);
-    //
-    // return this;
-    // }
-    //
-    // public Animator animate(Css styles, int duration, int delay) {
-    // animate(styles, duration, delay, Ease.DEFAULT);
-    // return this;
-    // }
-    //
-    // public Animator animate(Css styles, int duration) {
-    // animate(styles, duration, 0, Ease.DEFAULT);
-    // return this;
-    // }
-    //
-    // private ClientEvent triggerOnEvent = null;
-    //
-    // public Animator on(AbstractClientConnector target, ClientEvent event) {
-    // triggerOnEvent = event;
-    // return this;
-    // }
+		return anim;
+	}
+
+	protected void fireAnimationEndEvent(CssAnimation animation) {
+		fireEvent(new AnimationEndEvent((Component) getParent(), animation));
+	}
+
+	public interface AnimationListener {
+		public static final Method animMethod = ReflectTools.findMethod(
+				AnimationListener.class, "animationEnd",
+				AnimationEndEvent.class);
+
+		public void animationEnd(AnimationEndEvent event);
+	}
+
+	public void addListener(AnimationListener listener) {
+		addListener(AnimationEndEvent.EVENT_ID, AnimationEndEvent.class,
+				listener, AnimationListener.animMethod);
+	}
+
+	public void removeListener(AnimationListener listener) {
+		removeListener(AnimationEndEvent.EVENT_ID, AnimationEndEvent.class,
+				listener);
+	}
+
+	public static class AnimationEndEvent extends Component.Event {
+
+		private static final long serialVersionUID = 2181324846162279412L;
+
+		public static final String EVENT_ID = "animation";
+		private CssAnimation animation;
+
+		public AnimationEndEvent(Component source, CssAnimation animation) {
+			super(source);
+			this.animation = animation;
+		}
+
+		public CssAnimation getAnimation() {
+			return animation;
+		}
+
+		public String toString() {
+			return animation.toString();
+		}
+	}
 
 }

@@ -15,6 +15,8 @@ import com.vaadin.shared.ui.Connect;
 @Connect(Dom.class)
 public class DomConnector extends AbstractExtensionConnector {
 
+	private static final long serialVersionUID = -7807146623985961818L;
+
 	private AbstractComponentConnector target;
 	private Element targetElement;
 	private Style targetStyle;
