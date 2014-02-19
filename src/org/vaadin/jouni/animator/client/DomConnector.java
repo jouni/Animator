@@ -15,179 +15,187 @@ import com.vaadin.shared.ui.Connect;
 @Connect(Dom.class)
 public class DomConnector extends AbstractExtensionConnector {
 
-    private AbstractComponentConnector target;
-    private Element targetElement;
-    private Style targetStyle;
+	private AbstractComponentConnector target;
+	private Element targetElement;
+	private Style targetStyle;
 
-    static final String transitionName = whichTransition();
-    static final String transformName = whichTransform();
+	static final String transformProperty = whichTransformProperty();
 
-    public static native String whichTransition()
-    /*-{
-        var el = document.createElement('fakeelement');
-        var transitions = [
-          'transition',
-          'OTransition',
-          'MozTransition',
-          'WebkitTransition'
-        ]
-    
-        for(var i=0; i < transitions.length; i++) {
-            if( el.style[transitions[i]] !== undefined ){
-                return transitions[i];
-            }
-        }
-    }-*/;
+	public static native String whichTransitionProperty()
+	/*-{
+	    var el = document.createElement('fakeelement');
+	    var transitions = [
+	      'transition',
+	      'OTransition',
+	      'MozTransition',
+	      'WebkitTransition'
+	    ]
+	
+	    for(var i=0; i < transitions.length; i++) {
+	        if( el.style[transitions[i]] !== undefined ){
+	            return transitions[i];
+	        }
+	    }
+	}-*/;
 
-    public static native String whichAnimation()
-    /*-{
-        var el = document.createElement('fakeelement');
-        var anims = [
-          'animation',
-          'OAnimation',
-          'MozAnimation',
-          'WebkitAnimation'
-        ]
-    
-        for(var i=0; i < anims.length; i++) {
-            if( el.style[anims[i]] !== undefined ){
-                return anims[i];
-            }
-        }
-    }-*/;
+	public static native String whichAnimationProperty()
+	/*-{
+	    var el = document.createElement('fakeelement');
+	    var anims = [
+	      'animation',
+	      'OAnimation',
+	      'MozAnimation',
+	      'WebkitAnimation'
+	    ]
+	
+	    for(var i=0; i < anims.length; i++) {
+	        if( el.style[anims[i]] !== undefined ){
+	            return anims[i];
+	        }
+	    }
+	}-*/;
 
-    public static native String whichAnimationEvent()
-    /*-{
-        var el = document.createElement('fakeelement');
-        var anims = {
-          'animationName': 'animationend',
-          'OAnimationName': 'oAnimationEnd',
-          'MozAnimation': 'animationend',
-          'WebkitAnimation': 'webkitAnimationEnd'
-        }
-    
-        for(var a in anims){
-            if( el.style[a] !== undefined ){
-                return anims[a];
-            }
-        }
-    }-*/;
+	public static native String whichAnimationEndEvent()
+	/*-{
+	    var el = document.createElement('fakeelement');
+	    var anims = {
+	      'animationName': 'animationend',
+	      'OAnimationName': 'oAnimationEnd',
+	      'MozAnimation': 'animationend',
+	      'WebkitAnimation': 'webkitAnimationEnd'
+	    }
+	
+	    for(var a in anims){
+	        if( el.style[a] !== undefined ){
+	            return anims[a];
+	        }
+	    }
+	}-*/;
 
-    public static native String whichTransform()
-    /*-{
-        var t;
-        var el = document.createElement('fakeelement');
-        var transforms = {
-          'transform': 'transform',
-          'MozTransform': '-moz-transform',
-          'WebkitTransform': '-webkit-transform'
-        }
-    
-        for(t in transforms){
-            if( el.style[t] !== undefined ){
-                return transforms[t];
-            }
-        }
-    }-*/;
+	public static native String whichTransitionEndEvent()
+	/*-{
+	    var el = document.createElement('fakeelement');
+	    var transitions = {
+	      'transition': 'transitionend',
+	      'OTransition': 'oAnimationEnd',
+	      'MozTransition': 'transitionend',
+	      'WebkitTransition': 'webkitTransitionEnd'
+	    }
+	
+	    for(var t in transitions){
+	        if( el.style[t] !== undefined ){
+	            return transitions[t];
+	        }
+	    }
+	}-*/;
 
-    public static native String whichKeyframes()
-    /*-{
-        var el = document.createElement('fakeelement');
-        var keyframes = {
-          'animationName': '@keyframes',
-          'OAnimationName': '@-o-keyframes',
-          'MozAnimation': '@-moz-keyframes',
-          'WebkitAnimation': '@-webkit-keyframes'
-        }
-    
-        for(var k in keyframes){
-            if( el.style[k] !== undefined ){
-                return keyframes[k];
-            }
-        }
-    }-*/;
+	public static native String whichTransformProperty()
+	/*-{
+	    var t;
+	    var el = document.createElement('fakeelement');
+	    var transforms = {
+	      'transform': 'transform',
+	      'MozTransform': '-moz-transform',
+	      'WebkitTransform': '-webkit-transform'
+	    }
+	
+	    for(t in transforms){
+	        if( el.style[t] !== undefined ){
+	            return transforms[t];
+	        }
+	    }
+	}-*/;
 
-    @Override
-    protected void extend(ServerConnector target) {
-        this.target = (AbstractComponentConnector) target;
-        targetElement = this.target.getWidget().getElement();
-        targetStyle = targetElement.getStyle();
-    }
+	public static native String whichKeyframesRule()
+	/*-{
+	    var el = document.createElement('fakeelement');
+	    var keyframes = {
+	      'animationName': '@keyframes',
+	      'OAnimationName': '@-o-keyframes',
+	      'MozAnimation': '@-moz-keyframes',
+	      'WebkitAnimation': '@-webkit-keyframes'
+	    }
+	
+	    for(var k in keyframes){
+	        if( el.style[k] !== undefined ){
+	            return keyframes[k];
+	        }
+	    }
+	}-*/;
 
-    @Override
-    public DomState getState() {
-        return (DomState) super.getState();
-    }
+	@Override
+	protected void extend(ServerConnector target) {
+		this.target = (AbstractComponentConnector) target;
+		targetElement = this.target.getWidget().getElement();
+		targetStyle = targetElement.getStyle();
+	}
 
-    @Override
-    public void onStateChanged(StateChangeEvent stateChangeEvent) {
-        super.onStateChanged(stateChangeEvent);
-        applyStyles();
-        applyAttributes();
-    }
+	@Override
+	public DomState getState() {
+		return (DomState) super.getState();
+	}
 
-    public static String prefixPropertyName(String propName) {
-        if (propName.startsWith("transform"))
-            propName = propName.replace("transform", transformName);
-        return propName;
-    }
+	@Override
+	public void onStateChanged(StateChangeEvent stateChangeEvent) {
+		super.onStateChanged(stateChangeEvent);
+		applyStyles();
+		applyAttributes();
+	}
 
-    public void applyStyles() {
-        // for (String propName : getState().css.properties.keySet()) {
-        // String value = getState().css.properties.get(propName);
-        // propName = toCamelCase(prefixPropertyName(propName));
-        // if (value != null) {
-        // targetStyle.setProperty(propName, value);
-        // } else {
-        // targetStyle.clearProperty(propName);
-        // }
-        // }
-    }
+	public static String prefixPropertyName(String propName) {
+		if (propName.startsWith("transform"))
+			propName = propName.replace("transform", transformProperty);
+		return propName;
+	}
 
-    public static void applyStyles(HashMap<String, String> styles,
-            Element target) {
-        for (String propName : styles.keySet()) {
-            String value = styles.get(propName);
-            propName = toCamelCase(prefixPropertyName(propName));
-            if (value != null) {
-                target.getStyle().setProperty(propName, value);
-            } else {
-                target.getStyle().clearProperty(propName);
-            }
-        }
-    }
+	public void applyStyles() {
+		applyStyles(getState().css.properties, targetElement);
+	}
 
-    public void applyAttributes() {
-        for (String attrName : getState().attributes.keySet()) {
-            String value = getState().attributes.get(attrName);
-            if (value != null) {
-                targetElement.setAttribute(attrName, value);
-            } else {
-                targetElement.setAttribute(attrName, "");
-            }
-        }
-    }
+	public static void applyStyles(HashMap<String, String> styles,
+			Element target) {
+		for (String propName : styles.keySet()) {
+			String value = styles.get(propName);
+			propName = domPropertyName(propName);
+			if (value != null) {
+				target.getStyle().setProperty(propName, value);
+			} else {
+				target.getStyle().clearProperty(propName);
+			}
+		}
+	}
 
-    public static native String toCamelCase(String text)
-    /*-{
-        return text.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
-    }-*/;
+	public void applyAttributes() {
+		for (String attrName : getState().attributes.keySet()) {
+			String value = getState().attributes.get(attrName);
+			if (value != null) {
+				targetElement.setAttribute(attrName, value);
+			} else {
+				targetElement.setAttribute(attrName, "");
+			}
+		}
+	}
 
-    public static String domPropertyName(String cssPropertyName) {
-        return toCamelCase(prefixPropertyName(cssPropertyName));
-    }
+	public static native String toCamelCase(String text)
+	/*-{
+	    return text.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+	}-*/;
 
-    @Override
-    public void onUnregister() {
-        // for (String propName : getState().css.properties.keySet()) {
-        // String value = getState().css.properties.get(propName);
-        // propName = toCamelCase(prefixPropertyName(propName));
-        // if (targetStyle.getProperty(propName) != null
-        // && targetStyle.getProperty(propName).equals(value)) {
-        // targetStyle.clearProperty(propName);
-        // }
-        // }
-        // TODO clear attributes
-        super.onUnregister();
-    }
+	public static String domPropertyName(String cssPropertyName) {
+		return toCamelCase(prefixPropertyName(cssPropertyName));
+	}
+
+	@Override
+	public void onUnregister() {
+		// for (String propName : getState().css.properties.keySet()) {
+		// String value = getState().css.properties.get(propName);
+		// propName = toCamelCase(prefixPropertyName(propName));
+		// if (targetStyle.getProperty(propName) != null
+		// && targetStyle.getProperty(propName).equals(value)) {
+		// targetStyle.clearProperty(propName);
+		// }
+		// }
+		// TODO clear attributes
+		super.onUnregister();
+	}
 }
