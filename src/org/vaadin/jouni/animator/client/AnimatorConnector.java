@@ -7,6 +7,7 @@ import org.vaadin.jouni.animator.Animator;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -14,6 +15,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -22,12 +25,17 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.ui.AbstractComponentConnector;
+import com.vaadin.client.ui.VOverlay;
 import com.vaadin.shared.ui.Connect;
 
 @Connect(Animator.class)
@@ -82,9 +90,16 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 					// Trigger on a particular event
 					// I really wish there was a more generic way of doing
 					// this event nonsense...
+
+					Widget targetWidget = target.getWidget();
+					if (animation.eventTarget != null) {
+						targetWidget = ((AbstractComponentConnector) animation.eventTarget)
+								.getWidget();
+					}
+
 					switch (animation.event) {
 					case BLUR:
-						target.getWidget().addDomHandler(new BlurHandler() {
+						targetWidget.addDomHandler(new BlurHandler() {
 							@Override
 							public void onBlur(BlurEvent event) {
 								runAnimation(animation);
@@ -92,54 +107,80 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 						}, BlurEvent.getType());
 						break;
 					case FOCUS:
-						target.getWidget().addDomHandler(new FocusHandler() {
+						targetWidget.addDomHandler(new FocusHandler() {
 							@Override
 							public void onFocus(FocusEvent event) {
 								runAnimation(animation);
 							}
 						}, FocusEvent.getType());
 						break;
-					case CLICK:
-						target.getWidget().addDomHandler(new ClickHandler() {
+					case CLICK_PRIMARY:
+					case CLICK_SECONDARY:
+						targetWidget.addDomHandler(new ClickHandler() {
 							@Override
 							public void onClick(ClickEvent event) {
-								runAnimation(animation);
+								if (event.getNativeButton() == Integer
+										.parseInt(animation.event.getParams()[0]))
+									runAnimation(animation);
 							}
 						}, ClickEvent.getType());
 						break;
-					case MOUSE_DOWN:
-						target.getWidget().addDomHandler(
-								new MouseDownHandler() {
-									@Override
-									public void onMouseDown(MouseDownEvent event) {
-										runAnimation(animation);
-									}
-								}, MouseDownEvent.getType());
+					case MOUSEDOWN:
+						targetWidget.addDomHandler(new MouseDownHandler() {
+							@Override
+							public void onMouseDown(MouseDownEvent event) {
+								runAnimation(animation);
+							}
+						}, MouseDownEvent.getType());
 						break;
-					case MOUSE_UP:
-						target.getWidget().addDomHandler(new MouseUpHandler() {
+					case MOUSEUP:
+						targetWidget.addDomHandler(new MouseUpHandler() {
 							@Override
 							public void onMouseUp(MouseUpEvent event) {
 								runAnimation(animation);
 							}
 						}, MouseUpEvent.getType());
-					case MOUSE_OUT:
-						target.getWidget().addDomHandler(new MouseOutHandler() {
+					case MOUSEOUT:
+						targetWidget.addDomHandler(new MouseOutHandler() {
 							@Override
 							public void onMouseOut(MouseOutEvent event) {
 								runAnimation(animation);
 							}
 						}, MouseOutEvent.getType());
 						break;
-					case MOUSE_OVER:
-						target.getWidget().addDomHandler(
-								new MouseOverHandler() {
-									@Override
-									public void onMouseOver(MouseOverEvent event) {
-										runAnimation(animation);
-									}
-								}, MouseOverEvent.getType());
+					case MOUSEOVER:
+						targetWidget.addDomHandler(new MouseOverHandler() {
+							@Override
+							public void onMouseOver(MouseOverEvent event) {
+								runAnimation(animation);
+							}
+						}, MouseOverEvent.getType());
 						break;
+					case WINDOW_CLOSE:
+						if (targetWidget instanceof VOverlay) {
+							VOverlay overlay = (VOverlay) targetWidget;
+							overlay.addCloseHandler(new CloseHandler<PopupPanel>() {
+								@Override
+								public void onClose(CloseEvent<PopupPanel> event) {
+									runAnimation(animation);
+								}
+							});
+						} else {
+							// TODO log a warning/error message
+						}
+					default:
+						if (animation.event.toString().startsWith("KEYDOWN")) {
+							targetWidget.addDomHandler(new KeyDownHandler() {
+								@Override
+								public void onKeyDown(KeyDownEvent event) {
+									int keycode = Integer
+											.parseInt(animation.event
+													.getParams()[0]);
+									if (event.getNativeKeyCode() == keycode)
+										runAnimation(animation);
+								}
+							}, KeyDownEvent.getType());
+						}
 					}
 				}
 			}
