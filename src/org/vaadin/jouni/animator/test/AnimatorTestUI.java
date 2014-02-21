@@ -1,12 +1,17 @@
 package org.vaadin.jouni.animator.test;
 
+import java.awt.Desktop.Action;
+
 import org.vaadin.jouni.animator.Animator;
 import org.vaadin.jouni.animator.Dom;
+import org.vaadin.jouni.animator.Snappy;
 import org.vaadin.jouni.animator.client.ClientEvent;
+import org.vaadin.jouni.animator.client.ClientEvent.Key;
 import org.vaadin.jouni.animator.client.Css;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -20,12 +25,12 @@ public class AnimatorTestUI extends UI {
 	@Override
 	public void init(VaadinRequest request) {
 		setContent(new VerticalLayout() {
-			// Label label = new Label("Animate Me") {
-			// {
-			// setSizeUndefined();
-			// }
-			// };
-			// Button button = new Button("Animate Me");
+			Label label = new Label("Animate Me") {
+				{
+					setSizeUndefined();
+				}
+			};
+			Button button = new Button("Animate Me");
 			// Window window = new Window("Animate Me") {
 			// {
 			// setContent(new Label(
@@ -36,7 +41,20 @@ public class AnimatorTestUI extends UI {
 			// };
 			// Animator animator = new Animator(button);
 			{
-				// addComponent(button);
+				Animator.animate(label, new Css().translateX("100px"))
+						.delay(1000).duration(2000);
+				addComponent(button);
+				addComponent(label);
+				Animator.animate(button, new Css().opacity(0));
+
+				TextField tf = new TextField();
+				new Snappy(tf)
+						.on(ClientEvent.keydown(Key.ESC))
+						.animate(button,
+								new Css().translateX("100px").opacity(1))
+						.blur(tf);
+				addComponent(tf);
+
 				// addWindow(window);
 
 				// animator.animateOn(window, ClientEvent.WINDOW_CLOSE,
@@ -55,7 +73,6 @@ public class AnimatorTestUI extends UI {
 
 			}
 		});
-
 	}
 
 	static class SearchBar extends CssLayout {
@@ -66,6 +83,7 @@ public class AnimatorTestUI extends UI {
 		TextField searchField = new TextField();
 		NativeButton cancel = new NativeButton("Cancel");
 		CssLayout searchWrapper = new CssLayout();
+		Dom searchWrapperDom = new Dom(searchWrapper);
 
 		HorizontalLayout filters = new HorizontalLayout();
 		NativeButton sender = new NativeButton("Sender");
@@ -75,9 +93,6 @@ public class AnimatorTestUI extends UI {
 
 		VerticalLayout wrapper = new VerticalLayout();
 
-		Animator wrapperAnimator = new Animator(wrapper);
-		Animator cancelAnimator = new Animator(cancel);
-		Dom searchWrapperDom = new Dom(searchWrapper);
 
 		public SearchBar() {
 			setWidth("320px");
@@ -94,7 +109,8 @@ public class AnimatorTestUI extends UI {
 			cancel.setWidth("80px");
 			cancel.setHeight("30px");
 			searchWrapper.addComponents(searchField, cancel);
-			searchWrapperDom.style().setProperty("white-space", "nowrap");
+			searchWrapperDom.style().setProperty("white-space", "nowrap")
+					.setProperty("position", "relative");
 
 			filters.setWidth("100%");
 			filters.setHeight("30px");
@@ -107,19 +123,21 @@ public class AnimatorTestUI extends UI {
 			wrapper.addComponents(title, searchWrapper, filters);
 			addComponent(wrapper);
 
-			wrapperAnimator.animateOn(searchField, ClientEvent.FOCUS,
-					new Css().translateY("-30px"));
-			cancelAnimator.animateOn(searchField, ClientEvent.FOCUS,
-					new Css().translateX("-100%"));
+			new Snappy(searchField).on(ClientEvent.focus())
+					.animate(wrapper, new Css().translateY("-30px"))
+					.animate(cancel, new Css().translateX("-100%"))
+					.animate(title, new Css().translateY("20px"))
+					.on(ClientEvent.keydown(Key.ESC))
+					.animate(wrapper, new Css().translateY("0"))
+					.animate(cancel, new Css().translateX("0"))
+					.animate(title, new Css().translateY("0"))
+					.blur(searchField);
 
-			wrapperAnimator.animateOn(cancel, ClientEvent.CLICK_PRIMARY,
-					new Css().translateY("0"));
-			cancelAnimator.animateOn(null, ClientEvent.CLICK_PRIMARY,
-					new Css().translateX("0"));
-			wrapperAnimator.animateOn(searchField, ClientEvent.KEYDOWN_ESC,
-					new Css().translateY("0"));
-			cancelAnimator.animateOn(searchField, ClientEvent.KEYDOWN_ESC,
-					new Css().translateX("0"));
+			new Snappy(cancel).on(ClientEvent.clickPrimary())
+					.animate(wrapper, new Css().translateY("0"))
+					.animate(cancel, new Css().translateX("0"))
+					.animate(title, new Css().translateY("0"))
+					.blur(searchField);
 
 		}
 	}

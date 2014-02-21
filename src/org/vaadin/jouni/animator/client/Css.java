@@ -60,4 +60,14 @@ public class Css {
 		return this;
 	}
 
+	public Css width(String width) {
+		setProperty("width", width);
+		return this;
+	}
+
+	public Css height(String height) {
+		setProperty("height", height);
+		return this;
+	}
+
 }

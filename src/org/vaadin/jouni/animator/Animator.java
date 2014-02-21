@@ -4,13 +4,14 @@ import java.lang.reflect.Method;
 
 import org.vaadin.jouni.animator.client.AnimatorClientRpc;
 import org.vaadin.jouni.animator.client.AnimatorServerRpc;
-import org.vaadin.jouni.animator.client.ClientEvent;
 import org.vaadin.jouni.animator.client.Css;
 import org.vaadin.jouni.animator.client.CssAnimation;
 
-import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.AbstractExtension;
+import com.vaadin.server.Extension;
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.UI;
 import com.vaadin.util.ReflectTools;
 
 public class Animator extends AbstractExtension {
@@ -18,7 +19,6 @@ public class Animator extends AbstractExtension {
 	private static final long serialVersionUID = 2876055108100881743L;
 
 	private AnimatorServerRpc rpc = new AnimatorServerRpc() {
-
 		private static final long serialVersionUID = 6125808362723118718L;
 
 		@Override
@@ -27,27 +27,32 @@ public class Animator extends AbstractExtension {
 		}
 	};
 
-	public Animator(AbstractClientConnector target) {
+	private Animator(UI target) {
 		super.extend(target);
 		registerRpc(rpc);
 	}
 
-	public CssAnimation animateOn(AbstractClientConnector eventTarget,
-			ClientEvent event, Css properties) {
-
-		CssAnimation anim = new CssAnimation();
-		if (eventTarget != null) {
-			anim.eventTarget = eventTarget;
-		} else {
-			anim.eventTarget = (AbstractClientConnector) getParent();
+	public static CssAnimation animate(AbstractComponent target, Css properties) {
+		Animator animator = null;
+		UI ui = target.getUI();
+		if (ui == null) {
+			ui = UI.getCurrent();
 		}
-		anim.event = event;
-		anim.css = properties;
+		for (Extension ex : ui.getExtensions()) {
+			if (ex instanceof Animator) {
+				animator = (Animator) ex;
+			}
+		}
+		if (animator == null) {
+			animator = new Animator(ui);
+		}
+		return animator.animateOn(target, properties);
+	}
 
-		// queue.put(anim.id, anim);
-
+	protected CssAnimation animateOn(AbstractComponent animationTarget,
+			Css properties) {
+		CssAnimation anim = new CssAnimation(animationTarget, properties);
 		getRpcProxy(AnimatorClientRpc.class).animate(anim);
-
 		return anim;
 	}
 

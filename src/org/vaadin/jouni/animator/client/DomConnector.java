@@ -1,7 +1,5 @@
 package org.vaadin.jouni.animator.client;
 
-import java.util.HashMap;
-
 import org.vaadin.jouni.animator.Dom;
 
 import com.google.gwt.dom.client.Style;
@@ -145,13 +143,12 @@ public class DomConnector extends AbstractExtensionConnector {
 	}
 
 	public void applyStyles() {
-		applyStyles(getState().css.properties, targetElement);
+		applyStyles(getState().css, targetElement);
 	}
 
-	public static void applyStyles(HashMap<String, String> styles,
-			Element target) {
-		for (String propName : styles.keySet()) {
-			String value = styles.get(propName);
+	public static void applyStyles(Css css, Element target) {
+		for (String propName : css.properties.keySet()) {
+			String value = css.properties.get(propName);
 			propName = domPropertyName(propName);
 			if (value != null) {
 				target.getStyle().setProperty(propName, value);

@@ -8,6 +8,8 @@ public class CssAnimation {
 
 	public int id = idCounter++;
 
+	public Connector animationTarget = null;
+
 	public Css css = new Css();
 
 	public int duration = 200;
@@ -18,11 +20,16 @@ public class CssAnimation {
 
 	public Ease easing = Ease.DEFAULT;
 
-	public Connector eventTarget = null;
-
-	public ClientEvent event = null;
-
 	public boolean useKeyframeAnimation = false;
+
+	public CssAnimation() {
+
+	}
+
+	public CssAnimation(Connector target, Css css) {
+		animationTarget = target;
+		this.css = css;
+	}
 
 	public CssAnimation duration(int millis) {
 		duration = millis;
