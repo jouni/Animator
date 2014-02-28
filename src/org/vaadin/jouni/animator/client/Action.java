@@ -6,10 +6,22 @@ public class Action {
 	public enum ActionType {
 		BLUR //
 		, FOCUS //
+		, SHOW //
+		, HIDE//
+		, ADD_STYLENAME //
+		, REMOVE_STYLENAME //
+		, TOGGLE_STYLENAME //
+		, CLICK //
+		, SET_TEXT //
+		, ENABLE //
+		, DISABLE //
 	}
 
 	public ActionType type;
 	public Connector target;
+	public String[] stringParams;
+	public int[] intParams;
+	public Object[] objParams;
 
 	public Action() {
 
