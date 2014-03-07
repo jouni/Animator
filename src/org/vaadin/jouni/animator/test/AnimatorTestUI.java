@@ -41,6 +41,9 @@ public class AnimatorTestUI extends UI {
             // };
             // Animator animator = new Animator(button);
             {
+                setMargin(true);
+                setSpacing(true);
+
                 Animator.animate(label, new Css().translateX("100px"))
                         .delay(1000).duration(2000);
                 addComponent(button);
@@ -118,6 +121,7 @@ public class AnimatorTestUI extends UI {
             body.setSizeFull();
             all.setSizeFull();
             filters.addComponents(sender, subject, body, all);
+            filters.setVisible(false);
 
             wrapper.addComponents(title, searchWrapper, filters);
             addComponent(wrapper);
@@ -125,7 +129,8 @@ public class AnimatorTestUI extends UI {
             new Snappy(searchField).on(ClientEvent.focus())
                     .animate(wrapper, new Css().translateY("-30px"))
                     .animate(cancel, new Css().translateX("-100%"))
-                    .animate(title, new Css().translateY("20px"))
+                    .animate(title, new Css().translateY("20px")).show(filters)
+                    //
                     .on(ClientEvent.keydown(Key.ESC)).setText(title, "Ah-ha!")
                     .click(cancel);
 

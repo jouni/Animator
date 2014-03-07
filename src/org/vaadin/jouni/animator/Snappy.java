@@ -26,13 +26,13 @@ public class Snappy extends AbstractExtension {
             switch (action.type) {
             case CLICK:
                 break;
-            case ADD_STYLENAME:
+            case STYLENAME_ADD:
                 target.addStyleName(action.stringParams[0]);
                 break;
-            case REMOVE_STYLENAME:
+            case STYLENAME_REMOVE:
                 target.removeStyleName(action.stringParams[0]);
                 break;
-            case TOGGLE_STYLENAME:
+            case STYLENAME_TOGGLE:
                 if (target.getStyleName().contains(action.stringParams[0])) {
                     target.removeStyleName(action.stringParams[0]);
                 } else {
@@ -148,6 +148,24 @@ public class Snappy extends AbstractExtension {
     public Snappy setText(AbstractComponent target, String text) {
         Action action = new Action(ActionType.SET_TEXT, target);
         action.stringParams = new String[] { text };
+        return addAction(action);
+    }
+
+    public Snappy addStyleName(AbstractComponent target, String stylename) {
+        Action action = new Action(ActionType.STYLENAME_ADD, target);
+        action.stringParams = new String[] { stylename };
+        return addAction(action);
+    }
+
+    public Snappy removeStyleName(AbstractComponent target, String stylename) {
+        Action action = new Action(ActionType.STYLENAME_REMOVE, target);
+        action.stringParams = new String[] { stylename };
+        return addAction(action);
+    }
+
+    public Snappy toggleStyleName(AbstractComponent target, String stylename) {
+        Action action = new Action(ActionType.STYLENAME_TOGGLE, target);
+        action.stringParams = new String[] { stylename };
         return addAction(action);
     }
 

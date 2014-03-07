@@ -33,6 +33,7 @@ import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.ui.AbstractComponentConnector;
+import com.vaadin.client.ui.VButton;
 import com.vaadin.shared.ui.Connect;
 
 @Connect(Snappy.class)
@@ -230,8 +231,11 @@ public class SnappyConnector extends AbstractExtensionConnector {
     }
 
     protected void doAction(Action action) {
-        Widget targetWidget = ((AbstractComponentConnector) action.target)
-                .getWidget();
+        Widget targetWidget = null;
+        if (action.target != null) {
+            targetWidget = ((AbstractComponentConnector) action.target)
+                    .getWidget();
+        }
 
         boolean notifyServer = false;
         switch (action.type) {
@@ -241,19 +245,19 @@ public class SnappyConnector extends AbstractExtensionConnector {
                     Document.get().createClickEvent(1, -1, -1, -1, -1, false,
                             false, false, false), targetWidget);
             break;
-        case ADD_STYLENAME:
+        case STYLENAME_ADD:
             if (action.stringParams != null) {
                 targetWidget.addStyleName(action.stringParams[0]);
             }
             notifyServer = true;
             break;
-        case REMOVE_STYLENAME:
+        case STYLENAME_REMOVE:
             if (action.stringParams != null) {
                 targetWidget.removeStyleName(action.stringParams[0]);
             }
             notifyServer = true;
             break;
-        case TOGGLE_STYLENAME:
+        case STYLENAME_TOGGLE:
             if (action.stringParams != null) {
                 if (targetWidget.getStyleName()
                         .contains(action.stringParams[0])) {
@@ -285,12 +289,17 @@ public class SnappyConnector extends AbstractExtensionConnector {
             boolean visible = true;
         case HIDE:
             visible = false;
-            targetWidget.setVisible(visible);
+            if (targetWidget != null) {
+                targetWidget.setVisible(visible);
+            }
             notifyServer = true;
             break;
         case SET_TEXT:
             if (targetWidget instanceof HTML && action.stringParams != null) {
                 ((HTML) targetWidget).setText(action.stringParams[0]);
+            }
+            if (targetWidget instanceof VButton && action.stringParams != null) {
+                ((VButton) targetWidget).setText(action.stringParams[0]);
             }
             notifyServer = true;
             break;
@@ -301,5 +310,4 @@ public class SnappyConnector extends AbstractExtensionConnector {
             rpc.actionDone(action);
         }
     }
-
 }
