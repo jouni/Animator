@@ -269,28 +269,36 @@ public class SnappyConnector extends AbstractExtensionConnector {
             notifyServer = true;
             break;
         case FOCUS:
-            boolean focus = true;
-        case BLUR:
-            focus = false;
             if (targetWidget instanceof FocusWidget) {
-                ((FocusWidget) targetWidget).setFocus(focus);
+                ((FocusWidget) targetWidget).setFocus(true);
+            }
+            break;
+        case BLUR:
+            if (targetWidget instanceof FocusWidget) {
+                ((FocusWidget) targetWidget).setFocus(false);
             }
             break;
         case ENABLE:
-            boolean enabled = true;
-        case DISABLE:
-            enabled = false;
             if (targetWidget instanceof FocusWidget) {
-                ((FocusWidget) targetWidget).setEnabled(enabled);
+                ((FocusWidget) targetWidget).setEnabled(true);
+            }
+            notifyServer = true;
+            break;
+        case DISABLE:
+            if (targetWidget instanceof FocusWidget) {
+                ((FocusWidget) targetWidget).setEnabled(false);
             }
             notifyServer = true;
             break;
         case SHOW:
-            boolean visible = true;
-        case HIDE:
-            visible = false;
             if (targetWidget != null) {
-                targetWidget.setVisible(visible);
+                targetWidget.setVisible(true);
+            }
+            notifyServer = true;
+            break;
+        case HIDE:
+            if (targetWidget != null) {
+                targetWidget.setVisible(false);
             }
             notifyServer = true;
             break;

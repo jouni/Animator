@@ -1,6 +1,7 @@
 package org.vaadin.jouni.animator;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.vaadin.jouni.animator.client.Action;
 import org.vaadin.jouni.animator.client.Action.ActionType;
@@ -12,6 +13,8 @@ import org.vaadin.jouni.animator.client.SnappyState;
 
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.Label;
 
 public class Snappy extends AbstractExtension {
@@ -44,16 +47,28 @@ public class Snappy extends AbstractExtension {
             case BLUR:
                 break;
             case ENABLE:
-                boolean enabled = true;
+                target.setEnabled(true);
+                break;
             case DISABLE:
-                enabled = false;
-                target.setEnabled(enabled);
+                target.setEnabled(false);
                 break;
             case SHOW:
-                boolean visible = true;
+                if (target instanceof ComponentContainer) {
+                    for (Iterator<Component> iterator = ((ComponentContainer) target)
+                            .iterator(); iterator.hasNext();) {
+                        Component child = iterator.next();
+                        child.setVisible(true);
+                    }
+                }
+                break;
             case HIDE:
-                visible = false;
-                target.setVisible(visible);
+                if (target instanceof ComponentContainer) {
+                    for (Iterator<Component> iterator = ((ComponentContainer) target)
+                            .iterator(); iterator.hasNext();) {
+                        Component child = iterator.next();
+                        child.setVisible(false);
+                    }
+                }
                 break;
             case SET_TEXT:
                 if (target instanceof Label) {

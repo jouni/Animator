@@ -121,7 +121,12 @@ public class AnimatorTestUI extends UI {
             body.setSizeFull();
             all.setSizeFull();
             filters.addComponents(sender, subject, body, all);
-            filters.setVisible(false);
+            sender.setVisible(false);
+            subject.setVisible(false);
+            body.setVisible(false);
+            all.setVisible(false);
+            // filters.setVisible(false);
+            // new Dom(filters).style().setProperty("display", "none");
 
             wrapper.addComponents(title, searchWrapper, filters);
             addComponent(wrapper);
