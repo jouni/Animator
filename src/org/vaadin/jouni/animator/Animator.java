@@ -1,11 +1,13 @@
 package org.vaadin.jouni.animator;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 
 import org.vaadin.jouni.animator.client.AnimatorClientRpc;
 import org.vaadin.jouni.animator.client.AnimatorServerRpc;
-import org.vaadin.jouni.animator.client.Css;
 import org.vaadin.jouni.animator.client.CssAnimation;
+import org.vaadin.jouni.dom.Dom;
+import org.vaadin.jouni.dom.client.Css;
 
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.Extension;
@@ -18,12 +20,37 @@ public class Animator extends AbstractExtension {
 
     private static final long serialVersionUID = 2876055108100881743L;
 
+    private HashMap<AbstractComponent, Dom> targetToDom = new HashMap<AbstractComponent, Dom>();
+
     private AnimatorServerRpc rpc = new AnimatorServerRpc() {
         private static final long serialVersionUID = 6125808362723118718L;
 
         @Override
         public void animationEnd(CssAnimation animation) {
             fireAnimationEndEvent(animation);
+        }
+
+        @Override
+        public void preserveStyles(CssAnimation animation) {
+            if (animation.preserveStyles && animation.animationTarget != null) {
+                AbstractComponent target = (AbstractComponent) animation.animationTarget;
+
+                // TODO these need to be cleaned when the component is not used
+                // anymore. Perhaps use a WeakHashMap?
+                Dom dom = targetToDom.get(target);
+                if (dom == null) {
+                    dom = new Dom(target);
+                    targetToDom.put(target, dom);
+                }
+
+                for (String prop : animation.css.properties.keySet()) {
+                    dom.getStyle().setProperty(prop,
+                            animation.css.properties.get(prop));
+                }
+
+                // These updates can be lazy, so no need to send to client
+                // dom.getUI().getConnectorTracker().markClean(dom);
+            }
         }
     };
 
@@ -32,9 +59,12 @@ public class Animator extends AbstractExtension {
         registerRpc(rpc);
     }
 
-    public static CssAnimation animate(AbstractComponent target, Css properties) {
+    public static CssAnimation animate(CssAnimation animation) {
+        if (animation.animationTarget == null) {
+            throw new IllegalStateException("Animation target can not be null");
+        }
         Animator animator = null;
-        UI ui = target.getUI();
+        UI ui = ((AbstractComponent) animation.animationTarget).getUI();
         if (ui == null) {
             ui = UI.getCurrent();
         }
@@ -46,14 +76,16 @@ public class Animator extends AbstractExtension {
         if (animator == null) {
             animator = new Animator(ui);
         }
-        return animator.animateOn(target, properties);
+        animator.sendAnimation(animation);
+        return animation;
     }
 
-    protected CssAnimation animateOn(AbstractComponent animationTarget,
-            Css properties) {
-        CssAnimation anim = new CssAnimation(animationTarget, properties);
-        getRpcProxy(AnimatorClientRpc.class).animate(anim);
-        return anim;
+    public static CssAnimation animate(AbstractComponent target, Css properties) {
+        return animate(new CssAnimation(target, properties));
+    }
+
+    protected void sendAnimation(CssAnimation animation) {
+        getRpcProxy(AnimatorClientRpc.class).animate(animation);
     }
 
     protected void fireAnimationEndEvent(CssAnimation animation) {

@@ -1,14 +1,15 @@
 package org.vaadin.jouni.animator.test;
 
+import javax.servlet.annotation.WebServlet;
+
 import org.vaadin.jouni.animator.Animator;
-import org.vaadin.jouni.animator.Dom;
-import org.vaadin.jouni.animator.Snappy;
-import org.vaadin.jouni.animator.client.ClientEvent;
-import org.vaadin.jouni.animator.client.ClientEvent.Key;
-import org.vaadin.jouni.animator.client.Css;
+import org.vaadin.jouni.dom.Dom;
+import org.vaadin.jouni.dom.client.Css;
 
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -22,6 +23,13 @@ import com.vaadin.ui.VerticalLayout;
 
 @Theme("chameleon")
 public class AnimatorTestUI extends UI {
+
+    @WebServlet(value = "/*", asyncSupported = true)
+    @VaadinServletConfiguration(productionMode = false, ui = AnimatorTestUI.class, widgetset = "org.vaadin.jouni.animator.AnimatorWidgetset")
+    public static class Servlet extends VaadinServlet {
+        private static final long serialVersionUID = 1L;
+    }
+
     @Override
     public void init(VaadinRequest request) {
         setContent(new VerticalLayout() {
@@ -51,11 +59,11 @@ public class AnimatorTestUI extends UI {
                 Animator.animate(button, new Css().opacity(0));
 
                 TextField tf = new TextField();
-                new Snappy(tf)
-                        .on(ClientEvent.keydown(Key.ESC))
-                        .animate(button,
-                                new Css().translateX("100px").opacity(1))
-                        .blur(tf);
+                // new Snappy(tf)
+                // .on(ClientEvent.keydown(Key.ESC))
+                // .animate(button,
+                // new Css().translateX("100px").opacity(1))
+                // .blur(tf);
                 addComponent(tf);
 
                 // addWindow(window);
@@ -101,17 +109,17 @@ public class AnimatorTestUI extends UI {
             setHeight("60px");
 
             title.setHeight("30px");
-            titleDom.style().setProperty("text-align", "center");
-            titleDom.style().setProperty("font-size", "18px");
-            titleDom.style().setProperty("line-height", "30px");
-            titleDom.style().setProperty("font-weight", "bold");
+            titleDom.getStyle().setProperty("text-align", "center");
+            titleDom.getStyle().setProperty("font-size", "18px");
+            titleDom.getStyle().setProperty("line-height", "30px");
+            titleDom.getStyle().setProperty("font-weight", "bold");
 
             searchField.setWidth("320px");
             searchField.setHeight("30px");
             cancel.setWidth("80px");
             cancel.setHeight("30px");
             searchWrapper.addComponents(searchField, cancel);
-            searchWrapperDom.style().setProperty("white-space", "nowrap")
+            searchWrapperDom.getStyle().setProperty("white-space", "nowrap")
                     .setProperty("position", "relative");
 
             filters.setWidth("100%");
@@ -131,19 +139,29 @@ public class AnimatorTestUI extends UI {
             wrapper.addComponents(title, searchWrapper, filters);
             addComponent(wrapper);
 
-            new Snappy(searchField).on(ClientEvent.focus())
-                    .animate(wrapper, new Css().translateY("-30px"))
-                    .animate(cancel, new Css().translateX("-100%"))
-                    .animate(title, new Css().translateY("20px")).show(filters)
-                    //
-                    .on(ClientEvent.keydown(Key.ESC)).setText(title, "Ah-ha!")
-                    .click(cancel);
+            // new Snappy(searchField)
+            // .on(ClientEvent.focus())
+            // .animate(wrapper, new Css().translateY("-30px"))
+            // .animate(cancel, new Css().translateX("-100%"))
+            // .animate(title, new Css().translateY("20px"))
+            // .show(filters)
+            // .addActionListener(new ActionListener() {
+            // public void onActionDone(Action action) {
+            // if (action.type == ActionType.SHOW
+            // && action.target == filters) {
+            // // TODO make children visible
+            // }
+            // }
+            // })
+            //
+            // .on(ClientEvent.keydown(Key.ESC)).setText(title, "Ah-ha!")
+            // .click(cancel);
 
-            new Snappy(cancel).on(ClientEvent.clickPrimary())
-                    .animate(wrapper, new Css().translateY("0"))
-                    .animate(cancel, new Css().translateX("0"))
-                    .animate(title, new Css().translateY("0"))
-                    .blur(searchField);
+            // new Snappy(cancel).on(ClientEvent.clickPrimary())
+            // .animate(wrapper, new Css().translateY("0"))
+            // .animate(cancel, new Css().translateX("0"))
+            // .animate(title, new Css().translateY("0"))
+            // .blur(searchField);
 
             cancel.addClickListener(new ClickListener() {
                 @Override

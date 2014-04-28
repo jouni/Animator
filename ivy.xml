@@ -32,6 +32,8 @@
 		<!-- Compiler for custom widget sets. Should not be deployed -->
 		<dependency org="com.vaadin" name="vaadin-client-compiler"
 			rev="&vaadin.version;" conf="widgetset-compile->default" />
+			
+		<dependency org="org.vaadin.addons" name="dom" rev="0.1.0" />
 	</dependencies>
 </ivy-module>
     

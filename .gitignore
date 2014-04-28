@@ -1,25 +1,15 @@
 
 .settings
 
-.settings/*
-
 WebContent/VAADIN/widgetsets
 
-WebContent/VAADIN/widgetsets/*
-
-WebContent/WEB-INF/lib/vaadin*.jar
+WebContent/WEB-INF/lib
 
 build
 
-build/*
-
 deploy
-
-deploy/*
-
-*.svn
-
-.svn
 
 *.launch
 WebContent/VAADIN/gwt-unitCache*
+
+.classpath

@@ -6,4 +6,6 @@ public interface AnimatorServerRpc extends ServerRpc {
 
     public void animationEnd(CssAnimation animation);
 
+    public void preserveStyles(CssAnimation animation);
+
 }

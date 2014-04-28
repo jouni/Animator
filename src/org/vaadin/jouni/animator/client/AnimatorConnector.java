@@ -1,15 +1,17 @@
 package org.vaadin.jouni.animator.client;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import org.vaadin.jouni.animator.Animator;
+import org.vaadin.jouni.dom.client.DomConnector;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
@@ -45,120 +47,27 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 
             @Override
             public void animate(final CssAnimation animation) {
-                // if (animation.event == null) {
-                // No event trigger, animate instantly
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                     @Override
                     public void execute() {
                         runAnimation(animation);
+
+                        if (animation.preserveStyles) {
+                            // TODO this doesn't need to be immediate
+                            rpc.preserveStyles(animation);
+                        }
                     }
                 });
-                // } else {
-                // // Trigger on a particular event
-                // // I really wish there was a more generic way of doing
-                // // this event nonsense...
-                //
-                // Widget targetWidget = ((AbstractComponentConnector)
-                // animation.animationTarget)
-                // .getWidget();
-                // if (animation.eventTarget != null) {
-                // targetWidget = ((AbstractComponentConnector)
-                // animation.eventTarget)
-                // .getWidget();
-                // }
-                //
-                // switch (animation.event) {
-                // case BLUR:
-                // targetWidget.addDomHandler(new BlurHandler() {
-                // @Override
-                // public void onBlur(BlurEvent event) {
-                // runAnimation(animation);
-                // }
-                // }, BlurEvent.getType());
-                // break;
-                // case FOCUS:
-                // targetWidget.addDomHandler(new FocusHandler() {
-                // @Override
-                // public void onFocus(FocusEvent event) {
-                // runAnimation(animation);
-                // }
-                // }, FocusEvent.getType());
-                // break;
-                // case CLICK_PRIMARY:
-                // case CLICK_SECONDARY:
-                // targetWidget.addDomHandler(new ClickHandler() {
-                // @Override
-                // public void onClick(ClickEvent event) {
-                // if (event.getNativeButton() == Integer
-                // .parseInt(animation.event.getParams()[0]))
-                // runAnimation(animation);
-                // }
-                // }, ClickEvent.getType());
-                // break;
-                // case MOUSEDOWN:
-                // targetWidget.addDomHandler(new MouseDownHandler() {
-                // @Override
-                // public void onMouseDown(MouseDownEvent event) {
-                // runAnimation(animation);
-                // }
-                // }, MouseDownEvent.getType());
-                // break;
-                // case MOUSEUP:
-                // targetWidget.addDomHandler(new MouseUpHandler() {
-                // @Override
-                // public void onMouseUp(MouseUpEvent event) {
-                // runAnimation(animation);
-                // }
-                // }, MouseUpEvent.getType());
-                // case MOUSEOUT:
-                // targetWidget.addDomHandler(new MouseOutHandler() {
-                // @Override
-                // public void onMouseOut(MouseOutEvent event) {
-                // runAnimation(animation);
-                // }
-                // }, MouseOutEvent.getType());
-                // break;
-                // case MOUSEOVER:
-                // targetWidget.addDomHandler(new MouseOverHandler() {
-                // @Override
-                // public void onMouseOver(MouseOverEvent event) {
-                // runAnimation(animation);
-                // }
-                // }, MouseOverEvent.getType());
-                // break;
-                // case WINDOW_CLOSE:
-                // if (targetWidget instanceof VOverlay) {
-                // VOverlay overlay = (VOverlay) targetWidget;
-                // overlay.addCloseHandler(new CloseHandler<PopupPanel>() {
-                // @Override
-                // public void onClose(CloseEvent<PopupPanel> event) {
-                // runAnimation(animation);
-                // }
-                // });
-                // } else {
-                // // TODO log a warning/error message
-                // }
-                // default:
-                // if (animation.event.toString().startsWith("KEYDOWN")) {
-                // targetWidget.addDomHandler(new KeyDownHandler() {
-                // @Override
-                // public void onKeyDown(KeyDownEvent event) {
-                // int keycode = Integer
-                // .parseInt(animation.event
-                // .getParams()[0]);
-                // if (event.getNativeKeyCode() == keycode)
-                // runAnimation(animation);
-                // }
-                // }, KeyDownEvent.getType());
-                // }
-                // }
-                // }
             }
 
         });
     }
 
     static void runAnimation(CssAnimation animation) {
+        if (animation.animationTarget == null) {
+            getLogger().warning("animationTarget is 'null' for " + animation);
+            return;
+        }
         Element target = ((AbstractComponentConnector) animation.animationTarget)
                 .getWidget().getElement();
         Style targetStyle = target.getStyle();
@@ -234,11 +143,11 @@ public class AnimatorConnector extends AbstractExtensionConnector {
         var self = this;
         
         el.addEventListener(transitionEndEvent, function(e) {
-            @org.vaadin.jouni.animator.client.AnimatorConnector::onTransitionEnd(Lcom/google/gwt/user/client/Element;Ljava/lang/String;)(this, e.propertyName);
+            @org.vaadin.jouni.animator.client.AnimatorConnector::onTransitionEnd(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(this, e.propertyName);
         });
         
         el.addEventListener(animationEndEvent, function(e) {
-            self.@org.vaadin.jouni.animator.client.AnimatorConnector::onAnimationEnd(Lcom/google/gwt/user/client/Element;Ljava/lang/String;)(this, e.animationName);
+            self.@org.vaadin.jouni.animator.client.AnimatorConnector::onAnimationEnd(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(this, e.animationName);
         });
     }-*/;
 
@@ -309,15 +218,13 @@ public class AnimatorConnector extends AbstractExtensionConnector {
                 .appendChild(style);
     }
 
-    static native void log(Object msg)
-    /*-{
-    	console.log("ANIMATOR", msg);
-    }-*/;
+    static Logger getLogger() {
+        return Logger.getLogger(AnimatorConnector.class.getName());
+    }
 
     @Override
     protected void extend(ServerConnector target) {
         // TODO Auto-generated method stub
-
     }
 
 }

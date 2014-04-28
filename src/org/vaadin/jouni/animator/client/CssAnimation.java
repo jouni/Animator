@@ -1,8 +1,12 @@
 package org.vaadin.jouni.animator.client;
 
+import org.vaadin.jouni.dom.client.Css;
+
 import com.vaadin.shared.Connector;
 
 public class CssAnimation {
+
+    public static final int DEFAULT_DURATION = 200;
 
     static int idCounter = 0;
 
@@ -12,7 +16,7 @@ public class CssAnimation {
 
     public Css css = new Css();
 
-    public int duration = 200;
+    public int duration = DEFAULT_DURATION;
 
     public int delay = 0;
 
@@ -21,6 +25,8 @@ public class CssAnimation {
     public Ease easing = Ease.DEFAULT;
 
     public boolean useKeyframeAnimation = false;
+
+    public boolean preserveStyles = true;
 
     public CssAnimation() {
 
@@ -51,4 +57,15 @@ public class CssAnimation {
         return this;
     }
 
+    public CssAnimation preserveStyles(boolean preserve) {
+        preserveStyles = preserve;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "CssAnimation[" + id + ", " + animationTarget + ", " + css
+                + ", " + duration + ", " + delay + ", " + iterationCount + ", "
+                + easing + ", " + useKeyframeAnimation + "]";
+    }
 }
