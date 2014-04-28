@@ -13,3 +13,5 @@ deploy
 WebContent/VAADIN/gwt-unitCache*
 
 .classpath
+
+dist
