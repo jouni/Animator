@@ -23,3 +23,5 @@ deploy/*
 
 *.launch
 WebContent/VAADIN/gwt-unitCache*
+
+dist

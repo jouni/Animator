@@ -1,9 +1,9 @@
 package org.vaadin.jouni.animator;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-import java.util.WeakHashMap;
 
 import org.vaadin.jouni.animator.client.VAnimatorProxy;
 import org.vaadin.jouni.animator.shared.AnimType;
@@ -118,8 +118,7 @@ public class AnimatorProxy extends AbstractComponent implements LegacyComponent 
     }
 
     /* Internal mapping to handle events from client side */
-    // TODO are the objects garbage collected ever?
-    private Map<Integer, Animation> animIdToRequest = new WeakHashMap<Integer, Animation>();
+    private Map<Integer, Animation> animIdToRequest = new HashMap<Integer, Animation>();
     /* Incremental id for components; used in client-server communication */
     private int animId = 0;
 
@@ -180,8 +179,9 @@ public class AnimatorProxy extends AbstractComponent implements LegacyComponent 
                     }
                 }
 
-                if (cancelled)
+                if (cancelled) {
                     continue;
+                }
 
                 if (type.equals(AnimType.FADE_OUT_REMOVE)
                         || type.equals(AnimType.ROLL_UP_CLOSE_REMOVE)
