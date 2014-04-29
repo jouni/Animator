@@ -54,7 +54,7 @@ public class Animator extends AbstractExtension {
         }
     };
 
-    private Animator(UI target) {
+    protected Animator(UI target) {
         super.extend(target);
         registerRpc(rpc);
     }
