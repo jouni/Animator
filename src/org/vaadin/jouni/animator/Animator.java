@@ -9,8 +9,10 @@ import org.vaadin.jouni.animator.client.CssAnimation;
 import org.vaadin.jouni.dom.Dom;
 import org.vaadin.jouni.dom.client.Css;
 
+import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.Extension;
+import com.vaadin.shared.Connector;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
@@ -19,6 +21,10 @@ import com.vaadin.util.ReflectTools;
 public class Animator extends AbstractExtension {
 
     private static final long serialVersionUID = 2876055108100881743L;
+
+    private static Animator currentAnimator;
+
+    private CssAnimation currentAnimation;
 
     private HashMap<AbstractComponent, Dom> targetToDom = new HashMap<AbstractComponent, Dom>();
 
@@ -32,24 +38,28 @@ public class Animator extends AbstractExtension {
 
         @Override
         public void preserveStyles(CssAnimation animation) {
-            if (animation.preserveStyles && animation.animationTarget != null) {
-                AbstractComponent target = (AbstractComponent) animation.animationTarget;
+            if (animation.preserveStyles && animation.animationTargets != null) {
+                for (Connector target : animation.animationTargets) {
+                    if (target == null) {
+                        continue;
+                    }
 
-                // TODO these need to be cleaned when the component is not used
-                // anymore. Perhaps use a WeakHashMap?
-                Dom dom = targetToDom.get(target);
-                if (dom == null) {
-                    dom = new Dom(target);
-                    targetToDom.put(target, dom);
+                    // TODO these need to be cleaned when the component is not
+                    // used anymore. Perhaps use a WeakHashMap?
+                    Dom dom = targetToDom.get(target);
+                    if (dom == null) {
+                        dom = new Dom((AbstractClientConnector) target);
+                        targetToDom.put((AbstractComponent) target, dom);
+                    }
+
+                    for (String prop : animation.to.properties.keySet()) {
+                        dom.getStyle().setProperty(prop,
+                                animation.to.properties.get(prop));
+                    }
+
+                    // These updates can be lazy, so no need to send to client
+                    dom.getUI().getConnectorTracker().markClean(dom);
                 }
-
-                for (String prop : animation.css.properties.keySet()) {
-                    dom.getStyle().setProperty(prop,
-                            animation.css.properties.get(prop));
-                }
-
-                // These updates can be lazy, so no need to send to client
-                // dom.getUI().getConnectorTracker().markClean(dom);
             }
         }
     };
@@ -59,12 +69,10 @@ public class Animator extends AbstractExtension {
         registerRpc(rpc);
     }
 
-    public static CssAnimation animate(CssAnimation animation) {
-        if (animation.animationTarget == null) {
-            throw new IllegalStateException("Animation target can not be null");
-        }
+    public static Animator animate(CssAnimation animation) {
         Animator animator = null;
-        UI ui = ((AbstractComponent) animation.animationTarget).getUI();
+        UI ui = ((AbstractClientConnector) animation.animationTargets[0])
+                .getUI();
         if (ui == null) {
             ui = UI.getCurrent();
         }
@@ -76,16 +84,52 @@ public class Animator extends AbstractExtension {
         if (animator == null) {
             animator = new Animator(ui);
         }
-        animator.sendAnimation(animation);
-        return animation;
+        currentAnimator = animator;
+        animator.currentAnimation = animation;
+        return animator;
     }
 
-    public static CssAnimation animate(AbstractComponent target, Css properties) {
-        return animate(new CssAnimation(target, properties));
+    public static Animator animate(AbstractComponent... targets) {
+        if (targets.length == 0) {
+            throw new IllegalArgumentException(
+                    "You need to specify at least one animation target.");
+        }
+        return animate(new CssAnimation(targets));
+    }
+
+    public Animator from(Css css) {
+        if (currentAnimation == null) {
+            throw new IllegalStateException(
+                    "No animation targets specified. Call the 'animate' method first.");
+        }
+        currentAnimation.from = css;
+        return currentAnimator;
+    }
+
+    public Animator to(Css css) {
+        return to(css, CssAnimation.DEFAULT_DURATION);
+    }
+
+    public Animator to(Css css, int duration) {
+        if (currentAnimation == null) {
+            throw new IllegalStateException(
+                    "No animation targets specified. Call the 'animate' method first.");
+        }
+        currentAnimation.to = css;
+        currentAnimation.duration = duration;
+        sendAnimation(currentAnimation);
+        return this;
     }
 
     protected void sendAnimation(CssAnimation animation) {
         getRpcProxy(AnimatorClientRpc.class).animate(animation);
+    }
+
+    public Animator queue(CssAnimation next) {
+        next.delay += currentAnimation.delay + currentAnimation.duration;
+        sendAnimation(next);
+        currentAnimation = next;
+        return this;
     }
 
     protected void fireAnimationEndEvent(CssAnimation animation) {

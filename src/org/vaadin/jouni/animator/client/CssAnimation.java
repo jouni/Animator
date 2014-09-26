@@ -12,9 +12,11 @@ public class CssAnimation {
 
     public int id = idCounter++;
 
-    public Connector animationTarget = null;
+    public Connector[] animationTargets = null;
 
-    public Css css = new Css();
+    public Css from = new Css();
+
+    public Css to = new Css();
 
     public int duration = DEFAULT_DURATION;
 
@@ -32,9 +34,12 @@ public class CssAnimation {
 
     }
 
-    public CssAnimation(Connector target, Css css) {
-        animationTarget = target;
-        this.css = css;
+    public CssAnimation(Connector... targets) {
+        if (targets.length == 0) {
+            throw new IllegalArgumentException(
+                    "You need to specify at least one animation target.");
+        }
+        animationTargets = targets;
     }
 
     public CssAnimation duration(int millis) {
@@ -62,10 +67,22 @@ public class CssAnimation {
         return this;
     }
 
+    public CssAnimation from(Css css) {
+        from = css;
+        return this;
+    }
+
+    public CssAnimation to(Css css) {
+        to = css;
+        return this;
+    }
+
     @Override
     public String toString() {
-        return "CssAnimation[" + id + ", " + animationTarget + ", " + css
-                + ", " + duration + ", " + delay + ", " + iterationCount + ", "
-                + easing + ", " + useKeyframeAnimation + "]";
+        return "CssAnimation[id: " + id + ", targets: " + animationTargets
+                + ", from: " + from + ", to: " + to + ", duration: " + duration
+                + ", delay: " + delay + ", iterations: " + iterationCount
+                + ", " + easing + ", keyframe-animation: "
+                + useKeyframeAnimation + "]";
     }
 }

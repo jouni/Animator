@@ -1,15 +1,12 @@
 package org.vaadin.jouni.animator.test;
 
-import javax.servlet.annotation.WebServlet;
-
 import org.vaadin.jouni.animator.Animator;
+import org.vaadin.jouni.animator.client.CssAnimation;
 import org.vaadin.jouni.dom.Dom;
 import org.vaadin.jouni.dom.client.Css;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -20,15 +17,18 @@ import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 @Theme("chameleon")
 public class AnimatorTestUI extends UI {
 
-    @WebServlet(value = "/*", asyncSupported = true)
-    @VaadinServletConfiguration(productionMode = false, ui = AnimatorTestUI.class, widgetset = "org.vaadin.jouni.animator.AnimatorWidgetset")
-    public static class Servlet extends VaadinServlet {
-        private static final long serialVersionUID = 1L;
-    }
+    // @WebServlet(value = "/*", asyncSupported = true)
+    // @VaadinServletConfiguration(productionMode = false, ui =
+    // AnimatorTestUI.class, widgetset =
+    // "org.vaadin.jouni.animator.AnimatorWidgetset")
+    // public static class Servlet extends VaadinServlet {
+    // private static final long serialVersionUID = 1L;
+    // }
 
     @Override
     public void init(VaadinRequest request) {
@@ -39,6 +39,7 @@ public class AnimatorTestUI extends UI {
                 }
             };
             Button button = new Button("Animate Me");
+            Window win = new Window("Window");
             // Window window = new Window("Animate Me") {
             // {
             // setContent(new Label(
@@ -47,24 +48,48 @@ public class AnimatorTestUI extends UI {
             // center();
             // }
             // };
-            // Animator animator = new Animator(button);
             {
                 setMargin(true);
                 setSpacing(true);
 
-                Animator.animate(label, new Css().translateX("100px"))
-                        .delay(1000).duration(2000);
+                // Animator.animate(label, new Css().translateX("100px"))
+                // .delay(1000).duration(2000);
                 addComponent(button);
                 addComponent(label);
-                Animator.animate(button, new Css().opacity(0));
 
-                TextField tf = new TextField();
+                button.addClickListener(new ClickListener() {
+                    public void buttonClick(ClickEvent event) {
+                        // Animator.animate(
+                        // new CssAnimation(button, label).sendEndEvent())
+                        // .to(new Css().scale(0.5));
+
+                        new Dom(button).getStyle()
+                                .setProperty("opacity", "0.5");
+
+                        Animator.animate(button, label)
+                                .to(new Css().translateY("200%"))
+
+                                .queue(new CssAnimation(label)
+                                        .to(new Css().translateY("0%"))
+                                        .duration(1000).delay(60))
+
+                                .queue(new CssAnimation(button).to(new Css()
+                                        .translateX("100%")))
+
+                                .queue(new CssAnimation(button)
+                                        .to(new Css().translateX("0%"))
+                                        .duration(1000).delay(60));
+                    }
+                });
+                // Animator.animate(button, new Css().opacity(0));
+
+                // TextField tf = new TextField();
                 // new Snappy(tf)
                 // .on(ClientEvent.keydown(Key.ESC))
                 // .animate(button,
                 // new Css().translateX("100px").opacity(1))
                 // .blur(tf);
-                addComponent(tf);
+                // addComponent(tf);
 
                 // addWindow(window);
 
@@ -80,7 +105,13 @@ public class AnimatorTestUI extends UI {
                 // }
                 // });
 
-                addComponent(new SearchBar());
+                // addComponent(new SearchBar());
+
+                // addWindow(win);
+                // new Dom(win).getStyle().opacity(0);
+                // Animator.animate(win, new Css().opacity(0)).duration(1);
+                // Animator.animate(win, new Css().opacity(1)).delay(0)
+                // .duration(1000);
 
             }
         });

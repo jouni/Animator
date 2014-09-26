@@ -3,6 +3,7 @@
 	<name>Animator</name>
 	<comment></comment>
 	<projects>
+		<project>DOM</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -40,4 +41,11 @@
 		<nature>com.vaadin.integration.eclipse.widgetsetNature</nature>
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>dom_src</name>
+			<type>2</type>
+			<location>/Users/jouni/Documents/Dev/DOM/src</location>
+		</link>
+	</linkedResources>
 </projectDescription>

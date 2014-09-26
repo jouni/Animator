@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
@@ -47,108 +48,145 @@ public class AnimatorConnector extends AbstractExtensionConnector {
 
             @Override
             public void animate(final CssAnimation animation) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                // TODO set the 'from' properties on the targets
+                Timer t = new Timer() {
                     @Override
-                    public void execute() {
+                    public void run() {
                         runAnimation(animation);
 
                         if (animation.preserveStyles) {
-                            // TODO this doesn't need to be immediate
                             rpc.preserveStyles(animation);
                         }
+
                     }
-                });
+                };
+                t.schedule(animation.delay);
             }
 
         });
     }
 
-    static void runAnimation(CssAnimation animation) {
-        if (animation.animationTarget == null) {
-            getLogger().warning("animationTarget is 'null' for " + animation);
+    public static void runAnimation(final CssAnimation animation) {
+        if (animation.animationTargets == null
+                || animation.animationTargets.length == 0) {
+            getLogger().warning(
+                    "No targets specified for this CssAnimation: " + animation);
             return;
         }
-        Element target = ((AbstractComponentConnector) animation.animationTarget)
-                .getWidget().getElement();
-        Style targetStyle = target.getStyle();
-
-        hookEvents(target);
-
         if (animation.useKeyframeAnimation) {
             addKeyframes(animation);
             runKeyframesAnimation(animation);
         } else {
-            String newTransition = "";
-            for (String propName : animation.css.properties.keySet()) {
-                String transitionValue = DomConnector
-                        .prefixPropertyName(propName)
-                        + " "
-                        + animation.duration
-                        + "ms "
-                        + animation.easing.cssValue()
-                        + " "
-                        + animation.delay
-                        + "ms";
+            Scheduler.get().scheduleFinally(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    for (int i = 0; i < animation.animationTargets.length; i++) {
+                        Element target = ((AbstractComponentConnector) animation.animationTargets[i])
+                                .getWidget().getElement();
+                        final Style targetStyle = target.getStyle();
 
-                if (newTransition.length() > 0) {
-                    newTransition += ", ";
-                }
-                newTransition += transitionValue;
+                        hookEvents(target, true, false);
 
-                // Set the target value for the transition
-                String value = animation.css.properties.get(propName);
-                targetStyle.setProperty(DomConnector.domPropertyName(propName),
-                        value);
-            }
+                        String newTransition = "";
+                        for (String propName : animation.to.properties.keySet()) {
+                            String transitionValue = DomConnector
+                                    .prefixPropertyName(propName)
+                                    + " "
+                                    + animation.duration
+                                    + "ms "
+                                    + animation.easing.cssValue();
 
-            // Re-apply old, still valid, transitions
-            String oldTransitions = targetStyle.getProperty(transitionProperty);
-            for (String t : oldTransitions.split(",")) {
-                String transitionProp = t.split(" ")[0].trim();
-                if (!newTransition.contains(transitionProp)) {
-                    if (newTransition.length() > 0) {
-                        newTransition += ", ";
+                            if (newTransition.length() > 0) {
+                                newTransition += ", ";
+                            }
+                            newTransition += transitionValue;
+
+                            // Set the target value for the transition
+                            String value = animation.to.properties
+                                    .get(propName);
+                            targetStyle.setProperty(
+                                    DomConnector.domPropertyName(propName),
+                                    value);
+                        }
+
+                        // Re-apply old, still valid, transitions
+                        String oldTransitions = targetStyle
+                                .getProperty(transitionProperty);
+                        for (String t : oldTransitions.split(",")) {
+                            String transitionProp = t.split(" ")[0].trim();
+                            if (!newTransition.contains(transitionProp)) {
+                                if (newTransition.length() > 0) {
+                                    newTransition += ", ";
+                                }
+                                newTransition += t;
+                            }
+                        }
+                        final String finalTransition = newTransition;
+
+                        // Set the new transition value, which finally triggers
+                        // the animation
+
+                        targetStyle.setProperty(transitionProperty,
+                                finalTransition);
                     }
-                    newTransition += t;
-                }
-            }
 
-            // Set the new transition value, which finally triggers the
-            // animation
-            targetStyle.setProperty(transitionProperty, newTransition);
+                }
+            });
         }
     }
 
     static void runKeyframesAnimation(CssAnimation animation) {
-        Style targetStyle = ((AbstractComponentConnector) animation.animationTarget)
-                .getWidget().getElement().getStyle();
-        String value = targetStyle.getProperty(animationProperty);
-        if (value.length() > 0) {
-            value += ", ";
+        if (animation.animationTargets == null
+                || animation.animationTargets.length == 0) {
+            getLogger().warning(
+                    "No targets specified for this CssAnimation: " + animation);
+            return;
         }
-        value += "animator-" + animation.id + " " + animation.duration + "ms "
-                + animation.easing.cssValue() + " " + animation.delay
-                + "ms forwards";
-        targetStyle.setProperty(animationProperty, value);
-        queue.put("animator-" + animation.id, animation);
+
+        // Only one target needs the end listener
+        Element target = ((AbstractComponentConnector) animation.animationTargets[0])
+                .getWidget().getElement();
+        hookEvents(target, false, true);
+
+        for (int i = 0; i < animation.animationTargets.length; i++) {
+            target = ((AbstractComponentConnector) animation.animationTargets[i])
+                    .getWidget().getElement();
+            Style targetStyle = target.getStyle();
+            String value = targetStyle.getProperty(animationProperty);
+            if (value.length() > 0) {
+                value += ", ";
+            }
+            value += "animator-" + animation.id + " " + animation.duration
+                    + "ms " + animation.easing.cssValue() + " forwards";
+            targetStyle.setProperty(animationProperty, value);
+        }
+
+        if (!queue.containsKey("animator-" + animation.id)) {
+            queue.put("animator-" + animation.id, animation);
+        }
     }
 
     // TODO TODO TODO do we need to clean up this listener, or is it collected
     // at the same time as the element itself, since this connector should be
     // collected when the target is collected?
-    private static native void hookEvents(Element el)
+    private static native void hookEvents(Element el, boolean transitionEnd,
+            boolean animationEnd)
     /*-{
         var transitionEndEvent = @org.vaadin.jouni.animator.client.AnimatorConnector::transitionEndEvent;
         var animationEndEvent = @org.vaadin.jouni.animator.client.AnimatorConnector::animationEndEvent;
         var self = this;
         
-        el.addEventListener(transitionEndEvent, function(e) {
-            @org.vaadin.jouni.animator.client.AnimatorConnector::onTransitionEnd(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(this, e.propertyName);
-        });
+        if(transitionEnd) {
+            el.addEventListener(transitionEndEvent, function(e) {
+                @org.vaadin.jouni.animator.client.AnimatorConnector::onTransitionEnd(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(this, e.propertyName);
+            });
+        }
         
-        el.addEventListener(animationEndEvent, function(e) {
-            self.@org.vaadin.jouni.animator.client.AnimatorConnector::onAnimationEnd(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(this, e.animationName);
-        });
+        if(animationEnd) {
+            el.addEventListener(animationEndEvent, function(e) {
+                self.@org.vaadin.jouni.animator.client.AnimatorConnector::onAnimationEnd(Lcom/google/gwt/dom/client/Element;Ljava/lang/String;)(this, e.animationName);
+            });
+        }
     }-*/;
 
     static void onTransitionEnd(Element target, String propertyName) {
@@ -164,16 +202,18 @@ public class AnimatorConnector extends AbstractExtensionConnector {
             }
         }
         target.getStyle().setProperty(transitionProperty, newTransition);
+        // TODO set the end value as an inline style property (to allow any
+        // queued keyframe animations to start properly from this state)
     }
 
     void onAnimationEnd(Element target, String animationName) {
         CssAnimation animation = queue.get(animationName);
 
         // Apply animated properties as inline style
-        for (String propName : animation.css.properties.keySet()) {
+        for (String propName : animation.to.properties.keySet()) {
             target.getStyle().setProperty(
                     DomConnector.domPropertyName(propName),
-                    animation.css.properties.get(propName));
+                    animation.to.properties.get(propName));
         }
 
         // if (animation.event == null) {
@@ -202,20 +242,23 @@ public class AnimatorConnector extends AbstractExtensionConnector {
     static String buildKeyframesRule(CssAnimation animation) {
         String keyframes = keyframesRule + " animator-" + animation.id
                 + " { 100% { ";
-        for (String propName : animation.css.properties.keySet()) {
+        for (String propName : animation.to.properties.keySet()) {
             keyframes += DomConnector.prefixPropertyName(propName) + ":"
-                    + animation.css.properties.get(propName) + "; ";
+                    + animation.to.properties.get(propName) + "; ";
         }
         keyframes += "}}";
         return keyframes;
     }
 
     static void addKeyframes(CssAnimation animation) {
-        Element style = DOM.createElement("style");
-        style.setId("animator-" + animation.id);
-        style.setInnerHTML(buildKeyframesRule(animation));
-        Document.get().getElementsByTagName("head").getItem(0)
-                .appendChild(style);
+        String styleId = "animator-" + animation.id;
+        if (Document.get().getElementById(styleId) == null) {
+            Element style = DOM.createElement("style");
+            style.setId(styleId);
+            style.setInnerHTML(buildKeyframesRule(animation));
+            Document.get().getElementsByTagName("head").getItem(0)
+                    .appendChild(style);
+        }
     }
 
     static Logger getLogger() {
