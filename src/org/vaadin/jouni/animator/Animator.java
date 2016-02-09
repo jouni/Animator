@@ -3,11 +3,10 @@ package org.vaadin.jouni.animator;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import org.vaadin.jouni.animator.client.Animation;
 import org.vaadin.jouni.animator.client.AnimatorClientRpc;
 import org.vaadin.jouni.animator.client.AnimatorServerRpc;
-import org.vaadin.jouni.animator.client.CssAnimation;
 import org.vaadin.jouni.dom.Dom;
-import org.vaadin.jouni.dom.client.Css;
 
 import com.vaadin.server.AbstractClientConnector;
 import com.vaadin.server.AbstractExtension;
@@ -22,25 +21,22 @@ public class Animator extends AbstractExtension {
 
     private static final long serialVersionUID = 2876055108100881743L;
 
-    private static Animator currentAnimator;
-
-    private CssAnimation currentAnimation;
-
     private HashMap<AbstractComponent, Dom> targetToDom = new HashMap<AbstractComponent, Dom>();
 
     private AnimatorServerRpc rpc = new AnimatorServerRpc() {
         private static final long serialVersionUID = 6125808362723118718L;
 
         @Override
-        public void animationEnd(CssAnimation animation) {
+        public void animationEnd(Animation animation) {
+            // TODO only fire for listeners of _this_ animation
             fireAnimationEndEvent(animation);
         }
 
         @Override
-        public void preserveStyles(CssAnimation animation) {
+        public void preserveStyles(Animation animation) {
             if (animation.preserveStyles && animation.animationTargets != null) {
                 for (Connector target : animation.animationTargets) {
-                    if (target == null) {
+                    if (target == null || target.getParent() == null) {
                         continue;
                     }
 
@@ -69,7 +65,11 @@ public class Animator extends AbstractExtension {
         registerRpc(rpc);
     }
 
-    public static Animator animate(CssAnimation animation) {
+    public static Animation add(Animation animation) {
+        return add(animation, null);
+    }
+
+    public static Animation add(Animation animation, AnimationListener listener) {
         Animator animator = null;
         UI ui = ((AbstractClientConnector) animation.animationTargets[0])
                 .getUI();
@@ -84,67 +84,28 @@ public class Animator extends AbstractExtension {
         if (animator == null) {
             animator = new Animator(ui);
         }
-        currentAnimator = animator;
-        animator.currentAnimation = animation;
-        return animator;
-    }
 
-    public static Animator animate(AbstractComponent... targets) {
-        if (targets.length == 0) {
-            throw new IllegalArgumentException(
-                    "You need to specify at least one animation target.");
+        if (listener != null) {
+            animator.addListener(listener);
         }
-        return animate(new CssAnimation(targets));
+
+        animator.getRpcProxy(AnimatorClientRpc.class).animate(animation);
+        return animation;
     }
 
-    public Animator from(Css css) {
-        if (currentAnimation == null) {
-            throw new IllegalStateException(
-                    "No animation targets specified. Call the 'animate' method first.");
-        }
-        currentAnimation.from = css;
-        return currentAnimator;
-    }
-
-    public Animator to(Css css) {
-        return to(css, CssAnimation.DEFAULT_DURATION);
-    }
-
-    public Animator to(Css css, int duration) {
-        if (currentAnimation == null) {
-            throw new IllegalStateException(
-                    "No animation targets specified. Call the 'animate' method first.");
-        }
-        currentAnimation.to = css;
-        currentAnimation.duration = duration;
-        sendAnimation(currentAnimation);
-        return this;
-    }
-
-    protected void sendAnimation(CssAnimation animation) {
-        getRpcProxy(AnimatorClientRpc.class).animate(animation);
-    }
-
-    public Animator queue(CssAnimation next) {
-        next.delay += currentAnimation.delay + currentAnimation.duration;
-        sendAnimation(next);
-        currentAnimation = next;
-        return this;
-    }
-
-    protected void fireAnimationEndEvent(CssAnimation animation) {
+    protected void fireAnimationEndEvent(Animation animation) {
         fireEvent(new AnimationEndEvent((Component) getParent(), animation));
     }
 
     public interface AnimationListener {
         public static final Method animMethod = ReflectTools.findMethod(
-                AnimationListener.class, "animationEnd",
+                AnimationListener.class, "onAnimationEnd",
                 AnimationEndEvent.class);
 
-        public void animationEnd(AnimationEndEvent event);
+        public void onAnimationEnd(AnimationEndEvent event);
     }
 
-    public void addListener(AnimationListener listener) {
+    protected void addListener(AnimationListener listener) {
         addListener(AnimationEndEvent.EVENT_ID, AnimationEndEvent.class,
                 listener, AnimationListener.animMethod);
     }
@@ -154,19 +115,19 @@ public class Animator extends AbstractExtension {
                 listener);
     }
 
-    public static class AnimationEndEvent extends Component.Event {
+    public class AnimationEndEvent extends Component.Event {
 
         private static final long serialVersionUID = 2181324846162279412L;
 
         public static final String EVENT_ID = "animation";
-        private CssAnimation animation;
+        private Animation animation;
 
-        public AnimationEndEvent(Component source, CssAnimation animation) {
+        public AnimationEndEvent(Component source, Animation animation) {
             super(source);
             this.animation = animation;
         }
 
-        public CssAnimation getAnimation() {
+        public Animation getAnimation() {
             return animation;
         }
 

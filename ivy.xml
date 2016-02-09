@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY vaadin.version "7.2-SNAPSHOT">
+	<!ENTITY vaadin.version "7.6.2">
 ]>
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,7 +20,6 @@
 
 		<!-- Vaadin themes -->
 		<dependency org="com.vaadin" name="vaadin-themes" rev="&vaadin.version;" />
-		<dependency org="com.vaadin" name="vaadin-theme-compiler" rev="&vaadin.version;" />
 
 		<!-- Precompiled DefaultWidgetSet -->
 		<dependency org="com.vaadin" name="vaadin-client-compiled"

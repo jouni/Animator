@@ -5,9 +5,9 @@ import com.vaadin.shared.communication.ServerRpc;
 
 public interface AnimatorServerRpc extends ServerRpc {
 
-    public void animationEnd(CssAnimation animation);
+    public void animationEnd(Animation animation);
 
     @Delayed
-    public void preserveStyles(CssAnimation animation);
+    public void preserveStyles(Animation animation);
 
 }
