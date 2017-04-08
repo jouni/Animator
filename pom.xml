@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.vaadin.jouni</groupId>
+    <groupId>org.vaadin.addons</groupId>
     <artifactId>animator</artifactId>
     <version>3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -30,6 +30,23 @@
         <Vaadin-Addon>${project.artifactId}-${project.version}.jar
         </Vaadin-Addon>
     </properties>
+
+	<organization>
+		<name>Jouni Koivuviita</name>
+		<url>https://github.com/jouni/Animator</url>
+	</organization>
+
+	<scm>
+		<url>git://github.com/jouni/Animator.git</url>
+		<connection>scm:git:git://github.com/jouni/Animator.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com:/jouni/Animator.git</developerConnection>
+		<tag>Animator add-on for Vaadin</tag>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/jouni/Animator/issues</url>
+	</issueManagement>
 
     <licenses>
         <license>
@@ -92,7 +109,7 @@
                             <Vaadin-Package-Version>1</Vaadin-Package-Version>
                             <Vaadin-License-Title>${Vaadin-License-Title}
                             </Vaadin-License-Title>
-                            <Vaadin-Widgetsets>org.vaadin.jouni.WidgetSet
+                            <Vaadin-Widgetsets>org.vaadin.jouni.animator.AnimatorWidgetset
                             </Vaadin-Widgetsets>
                         </manifestEntries>
                     </archive>
