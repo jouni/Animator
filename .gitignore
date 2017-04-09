@@ -15,3 +15,7 @@ WebContent/VAADIN/gwt-unitCache*
 .classpath
 
 dist
+
+.idea/
+*.iml
+target/

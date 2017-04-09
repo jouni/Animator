@@ -1,4 +1,4 @@
-package org.vaadin.jouni.animator.test;
+package org.vaadin.jouni.animator;
 
 import javax.servlet.annotation.WebServlet;
 
@@ -21,11 +21,11 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-@Theme("chameleon")
+@Theme("valo")
 public class AnimatorTestUI extends UI {
 
     @WebServlet(value = "/*", asyncSupported = true)
-    @VaadinServletConfiguration(productionMode = false, ui = AnimatorTestUI.class, widgetset = "org.vaadin.jouni.animator.AnimatorWidgetset")
+    @VaadinServletConfiguration(productionMode = false, ui = AnimatorTestUI.class, widgetset = "org.vaadin.jouni.animator.DemoWidgetSet")
     public static class Servlet extends VaadinServlet {
         private static final long serialVersionUID = 1L;
     }
